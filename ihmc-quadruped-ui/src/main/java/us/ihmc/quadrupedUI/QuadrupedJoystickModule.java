@@ -38,8 +38,6 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private static final double maxBodyRoll = 0.15;
    private static final double maxBodyPitch = 0.15;
    private static final double bodyOrientationShiftTime = 0.1;
-   private static final double maxYSpeedFraction = 0.5;
-   private static final double maxYawSpeedFraction = 0.75;
 
    private final MutableDouble maxVelocityY = new MutableDouble();
    private final MutableDouble maxVelocityYaw = new MutableDouble();
@@ -288,8 +286,8 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
       if (xVelocityChannel.hasNewData() || yVelocityChannel.hasNewData() || leftTurnChannel.hasNewData() || rightTurnChannel.hasNewData())
       {
-         maxVelocityY.setValue(maxYSpeedFraction * xGaitSettings.getMaxSpeed());
-         maxVelocityYaw.setValue(maxYawSpeedFraction * xGaitSettings.getMaxSpeed());
+         maxVelocityY.setValue(xGaitSettings.getMaxHorizontalSpeedFraction() * xGaitSettings.getMaxSpeed());
+         maxVelocityYaw.setValue(xGaitSettings.getMaxYawSpeedFraction() * xGaitSettings.getMaxSpeed());
 
          double xVelocity = xVelocityChannel.getValue() * xGaitSettings.getMaxSpeed();
          double yVelocity = yVelocityChannel.getValue() * maxVelocityY.getValue();
