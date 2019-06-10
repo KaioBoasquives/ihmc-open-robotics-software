@@ -57,8 +57,9 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
 
    private PlanarRegion originalRegion;
    private final HashMap<PlanarRegion, RigidBodyTransform> regionsChecked = new HashMap<>();
+
    @Override
-   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       constraintDataParameters.projectionInsideDelta = Math.min(projectionInsideDelta.getValue(), 0.025);

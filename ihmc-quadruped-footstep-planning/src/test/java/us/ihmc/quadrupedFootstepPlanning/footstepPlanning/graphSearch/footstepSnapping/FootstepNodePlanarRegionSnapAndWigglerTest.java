@@ -205,7 +205,7 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
             if (!troublesomeRegion.isPointInWorld2DInside(new Point3D(gridX, gridY, 0.0), 1e-8))
                continue;
 
-            FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex);
+            FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex, 0.0);
 
             Point3D snappedPointInWorld = new Point3D(gridX, gridY, 0.0);
             snapData.getSnapTransform().transform(snappedPointInWorld);
@@ -259,12 +259,13 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
 
          Point3D gridPointInLocal = new Point3D(gridX, gridY, 0.0);
          troublesomeRegion.transformFromWorldToLocal(gridPointInLocal);
+         double yaw = 0.0;
 
          // filters out snapping points that aren't inside via da grid.
          if (!troublesomeRegion.isPointInWorld2DInside(new Point3D(gridX, gridY, 0.0), 1e-8))
             continue;
 
-         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
 
          Point3D snappedPointInWorld = new Point3D(gridX, gridY, 0.0);
          snapData.getSnapTransform().transform(snappedPointInWorld);

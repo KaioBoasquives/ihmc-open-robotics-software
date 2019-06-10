@@ -70,7 +70,7 @@ public class PointFootSnapperVisualizer
       {
          for (int j = minYIndex; j <= maxYIndex; j++)
          {
-            FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, i, j);
+            FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, i, j, 0.0);
             Vector3DReadOnly snapTranslation = snapData.getSnapTransform().getTranslationVector();
 
             if(snapTranslation.containsNaN())

@@ -51,10 +51,10 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode node)
    {
-      return snapFootstepNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
+      return snapFootstepNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()), node.getNominalYaw());
    }
 
-   public FootstepNodeSnapData snapFootstepNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
+   public FootstepNodeSnapData snapFootstepNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex, double yaw)
    {
       SnapKey key = new SnapKey(xIndex, yIndex);
       if (snapDataHolder.containsKey(key))
@@ -67,7 +67,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         FootstepNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex);
+         FootstepNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex, yaw);
          addSnapData(xIndex, yIndex, snapData);
          return snapData;
       }
@@ -88,7 +88,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       return snapDataHolder.get(new SnapKey(xIndex, yIndex));
    }
 
-   protected abstract FootstepNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex);
+   protected abstract FootstepNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex, double yaw);
 
    private class SnapKey
    {

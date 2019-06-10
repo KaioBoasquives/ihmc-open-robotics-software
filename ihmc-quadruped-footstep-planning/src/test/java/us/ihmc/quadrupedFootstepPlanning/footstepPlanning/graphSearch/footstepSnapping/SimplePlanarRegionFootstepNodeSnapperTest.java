@@ -44,8 +44,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double x = xIndex * FootstepNode.gridSizeXY;
       double y = yIndex * FootstepNode.gridSizeXY;
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       Point3D snappedPoint = new Point3D(x, y, 0.0);
@@ -85,7 +86,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double y = yIndex * FootstepNode.gridSizeXY;
 
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex, 0.0);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(0);
@@ -139,7 +140,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double x = xIndex * FootstepNode.gridSizeXY;
       double y = yIndex * FootstepNode.gridSizeXY;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex, 0.0);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(0);
@@ -172,11 +173,12 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       snapper.setPlanarRegions(planarRegionsList);
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, 1000, 1);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, 1000, 1, yaw);
       Assertions.assertTrue(snapData == FootstepNodeSnapData.emptyData());
 
-      snapData = snapper.snapFootstepNode(robotQuadrant, 1, 1000);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 1, 1000, yaw);
       Assertions.assertTrue(snapData == FootstepNodeSnapData.emptyData());
    }
 
@@ -202,49 +204,50 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double expectedTranslation = projectionDistance - extraSquareWidth;
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
       // test snapping on front edge
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2, yaw);
       Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), translationVector, epsilon);
 
       // test snapping on back edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, 0.0, 0.0), translationVector, epsilon);
 
 
       // test snapping on left edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(0.0, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on right edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(0.0, expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on front-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on front-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on back-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on back-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), translationVector, epsilon);
    }
@@ -271,49 +274,50 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double expectedTranslation = - widthShrinkAmount;
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
       // test snapping on front edge
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2, yaw);
       Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), translationVector, epsilon);
 
       // test snapping on back edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, 0.0, 0.0), translationVector, epsilon);
 
       // test snapping on left edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(0.0, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on right edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(0.0, expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on front-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on front-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on back-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), translationVector, epsilon);
 
 
       // test snapping on back-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth, yaw);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), translationVector, epsilon);
 
@@ -341,9 +345,10 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       snapper.setPlanarRegions(planarRegionsList);
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
       // test snapping on front edge
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, 2, yaw);
       Point3D snappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY, 2 * FootstepNode.gridSizeXY, 0.0);
       Point3D expectedSnappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY - expectedTranslation, 2 * FootstepNode.gridSizeXY, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -352,7 +357,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on back edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, 3, yaw);
       snappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY, 3 * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, 3 * FootstepNode.gridSizeXY, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -360,7 +365,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on left edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 1, squareCellHalfWidth, yaw);
 
       snappedPoint = new Point3D(FootstepNode.gridSizeXY, squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(FootstepNode.gridSizeXY, squareCellHalfWidth * FootstepNode.gridSizeXY - expectedTranslation, 0.0);
@@ -370,7 +375,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on right edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(2 * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(2 * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -378,7 +383,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on right edge
-      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, 2, -squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(2 * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(2 * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -386,7 +391,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on front-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY, squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY -expectedTranslation, squareCellHalfWidth * FootstepNode.gridSizeXY - expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -394,7 +399,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on front-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, squareCellHalfWidth, -squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(squareCellHalfWidth * FootstepNode.gridSizeXY - expectedTranslation, -squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -402,7 +407,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on back-left corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY, squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, squareCellHalfWidth * FootstepNode.gridSizeXY - expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -410,7 +415,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       // test snapping on back-right corner
-      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth);
+      snapData = snapper.snapFootstepNode(robotQuadrant, -squareCellHalfWidth, -squareCellHalfWidth, yaw);
       snappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY, -squareCellHalfWidth * FootstepNode.gridSizeXY, 0.0);
       expectedSnappedPoint = new Point3D(-squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, -squareCellHalfWidth * FootstepNode.gridSizeXY + expectedTranslation, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -449,8 +454,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double y = yIndex * FootstepNode.gridSizeXY;
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
 
       Point3D snappedPoint = new Point3D(x, y, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -467,7 +473,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       x = xIndex * FootstepNode.gridSizeXY;
       y = yIndex * FootstepNode.gridSizeXY;
 
-      snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+      snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
 
       snappedPoint = new Point3D(x, y, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -510,8 +516,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+      double yaw = 0.0;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
 
       Point3D snappedPoint = new Point3D(x, y, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());
@@ -529,7 +536,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       x = xIndex * FootstepNode.gridSizeXY;
       y = yIndex * FootstepNode.gridSizeXY;
 
-      snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
+      snapData = snapper.snapFootstepNode(robotQuadrant, xIndex, yIndex, yaw);
 
       snappedPoint = new Point3D(x, y, 0.0);
       snappedPoint.applyTransform(snapData.getSnapTransform());

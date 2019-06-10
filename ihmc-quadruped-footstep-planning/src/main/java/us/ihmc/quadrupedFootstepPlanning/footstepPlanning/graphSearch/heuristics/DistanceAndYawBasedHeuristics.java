@@ -42,8 +42,8 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
          int nodeXIndex = node.getXIndex(robotQuadrant);
          int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         FootstepNodeSnapData goalNodeData = snapper.snapFootstepNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex);
-         FootstepNodeSnapData nodeData = snapper.snapFootstepNode(robotQuadrant, nodeXIndex, nodeYIndex);
+         FootstepNodeSnapData goalNodeData = snapper.snapFootstepNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex, goalNode.getNominalYaw());
+         FootstepNodeSnapData nodeData = snapper.snapFootstepNode(robotQuadrant, nodeXIndex, nodeYIndex, node.getNominalYaw());
 
          if (nodeData == null || goalNodeData == null)
          {

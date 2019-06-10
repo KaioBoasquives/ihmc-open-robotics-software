@@ -43,7 +43,7 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
 
 
    @Override
-   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       Vector2D projectionTranslation = new Vector2D();
@@ -53,7 +53,6 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
             .findHighestRegionWithProjection(footPosition, projectionTranslation, constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
                                              constraintDataParameters);
 
-
       if (highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
          return FootstepNodeSnapData.emptyData();
@@ -61,7 +60,7 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
       else
       {
          RigidBodyTransform snapTransform = getSnapTransformIncludingTranslation(footPosition, projectionTranslation, highestRegion);
-         snapTransform = pushAwayFromCliffs(footPosition, snapTransform, projectionTranslation, highestRegion);
+         snapTransform = pushAwayFromCliffs(robotQuadrant, footPosition, yaw, snapTransform, projectionTranslation, highestRegion);
 
          if (snapTransform == null)
             return FootstepNodeSnapData.emptyData();
@@ -70,14 +69,25 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
       }
    }
 
-   private RigidBodyTransform pushAwayFromCliffs(Point2DReadOnly footPosition, RigidBodyTransform snapTransform, Vector2DReadOnly projectionTranslation,
+   private RigidBodyTransform pushAwayFromCliffs(RobotQuadrant movingQuadrant, Point2DReadOnly footPosition, double footYaw,
+                                                 RigidBodyTransform snapTransform, Vector2DReadOnly projectionTranslation,
                                                  PlanarRegion highestRegion)
    {
       Point3D snappedFoot = new Point3D(footPosition);
       Point3D highestNearbyPoint = new Point3D();
 
       snapTransform.transform(snappedFoot);
-      CliffDetectionTools.findHighestNearbyRegion(planarRegionsList, snappedFoot, highestNearbyPoint, distanceToAvoidTallCliffs);
+
+      double forward = movingQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndForwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndForwardDistanceFromCliffBottoms();
+      double backward = movingQuadrant.isQuadrantInFront() ?
+            -parameters.getMinimumFrontEndBackwardDistanceFromCliffBottoms() :
+            -parameters.getMinimumHindEndBackwardDistanceFromCliffBottoms();
+      double left = parameters.getMinimumLateralDistanceFromCliffBottoms();
+      double right = -parameters.getMinimumLateralDistanceFromCliffBottoms();
+
+      CliffDetectionTools.findHighestNearbyPoint(planarRegionsList, snappedFoot, footYaw, highestNearbyPoint, forward, backward, left, right);
 
       double cliffHeight = highestNearbyPoint.getZ() - snappedFoot.getZ();
       if (cliffHeight < shortCliffHeightToAvoid)

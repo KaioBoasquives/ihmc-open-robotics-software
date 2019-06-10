@@ -45,7 +45,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    }
 
    @Override
-   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+   public FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       Vector2D projectionTranslation = new Vector2D();
