@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -8,15 +10,18 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTra
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -54,6 +59,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final SoftTouchdownPositionTrajectoryGenerator touchdownTrajectory;
 
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
+   private final RecyclingArrayList<FramePoint3D> customPositionWaypoints;
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
 
@@ -138,6 +144,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
       limitedSwingTimeSpeedUpFactor = new RateLimitedYoVariable(namePrefix + "LimitedTimeSpeedUpFactor", registry, speedUpFactorRateLimit, swingTimeSpeedUpFactor, controlDT);
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
+      customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
 
       isSwingPastDone = new YoBoolean(namePrefix + "IsSwingPastDone", registry);
 
@@ -257,6 +264,18 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
+         if (currentStepCommand.getTrajectoryType() == TrajectoryType.CUSTOM)
+         {            
+            if (currentStepCommand.getCustomPositionWaypoints().size() != 2)
+            {
+               LogTools.warn("Ignoring custom waypoint positions. Expected 2, got: " + currentStepCommand.getCustomPositionWaypoints().size());
+            }
+            else
+            {
+               return TrajectoryType.CUSTOM;
+            }
+         }
+         
          if (checkStepUpOrDown(finalPosition))
          {
             return TrajectoryType.OBSTACLE_CLEARANCE;
@@ -390,7 +409,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
          waypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
          waypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
          waypointCalculator.setStepTime(swingDuration.getDoubleValue());
-         waypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
          if (activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT)
          {
             oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());            
@@ -401,12 +419,21 @@ public class QuadrupedSwingState extends QuadrupedFootState
             twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());            
             waypointCalculator.setSwingHeight(obstacleClearanceSwingHeight);
          }
+         else if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
+         {
+            List<? extends Point3DBasics> positionWaypointsForSole = currentStepCommand.getCustomPositionWaypoints();
+            for (int i = 0; i < positionWaypointsForSole.size(); i++)
+            {
+               this.customPositionWaypoints.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), positionWaypointsForSole.get(i));            
+            }
+         }
          else
          {
             twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());            
             waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
          }
          
+         waypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue(), customPositionWaypoints);
          waypointCalculator.initialize();
       }
 

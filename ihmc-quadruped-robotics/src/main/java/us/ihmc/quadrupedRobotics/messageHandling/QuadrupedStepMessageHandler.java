@@ -107,8 +107,8 @@ public class QuadrupedStepMessageHandler
 
       stepPlanIsAdjustable.set(command.isStepPlanAdjustable());
       offsettingHeightPlanWithStepError.set(command.getOffsetStepsHeightWithExecutionError());
-
       receivedStepSequence.clear();
+      
       for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
       {
          double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime + initialTransferDurationForShifting.getDoubleValue();
