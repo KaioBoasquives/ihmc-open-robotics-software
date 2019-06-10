@@ -56,22 +56,29 @@ public class CliffDetectionTools
    public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
       transformToRegion.setRotationYaw(footYaw);
 
+      ConvexPolygon2D avoidanceRegion = new ConvexPolygon2D();
+      avoidanceRegion.addVertex(forward, left);
+      avoidanceRegion.addVertex(forward, right);
+      avoidanceRegion.addVertex(backward, left);
+      avoidanceRegion.addVertex(backward, right);
+      avoidanceRegion.update();
+      avoidanceRegion.applyTransform(transformToRegion);
+      avoidanceRegion.translate(footInWorld.getX(), footInWorld.getY());
 
-      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-      tempPolygon.addVertex(forward, left);
-      tempPolygon.addVertex(forward, right);
-      tempPolygon.addVertex(backward, left);
-      tempPolygon.addVertex(backward, right);
-      tempPolygon.update();
-      tempPolygon.applyTransform(transformToRegion);
-      tempPolygon.translate(footInWorld.getX(), footInWorld.getY());
+      return findHighestNearbyPoint(planarRegionsList, footInWorld, highestNearbyPointToPack, avoidanceRegion);
 
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+   }
+
+   public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics highestNearbyPointToPack,
+                                               ConvexPolygon2D avoidanceRegion)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+
+
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(avoidanceRegion, planarRegionsList.getPlanarRegionsAsList());
 
       for (PlanarRegion intersectingRegion : intersectingRegions)
       {
@@ -79,7 +86,7 @@ public class CliffDetectionTools
 
          double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
 
-         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()) && heightOfPointFromFoot > maxZInSoleFrame)
+         if (avoidanceRegion.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()) && heightOfPointFromFoot > maxZInSoleFrame)
          {
             maxZInSoleFrame = heightOfPointFromFoot;
             highestNearbyPointToPack.set(closestPointInWorld);
