@@ -1,28 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
-import org.ojalgo.function.multiary.MultiaryFunction.Convex;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
 
 public class CliffDetectionTools
 {
-   public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw, FootstepPlannerParameters parameters,
-                                     double forward, double backward, double left, double right)
-   {
-      return isNearCliff(planarRegionsList, footInWorld, footYaw, parameters.getCliffHeightToAvoid(), forward, backward, left, right);
-   }
 
    public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw, double cliffHeightToAvoid,
                                      double forward, double backward, double left, double right)
@@ -31,15 +22,16 @@ public class CliffDetectionTools
          return true;
 
       Point3D highestNearbyPoint = new Point3D();
-      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(planarRegionsList, footInWorld, footYaw, highestNearbyPoint, forward, backward, left, right);
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, footInWorld, footYaw, highestNearbyPoint, forward, backward, left, right);
 
       return maximumCliffZInSoleFrame > cliffHeightToAvoid;
    }
 
-   private static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics highestNearbyPointToPack,
-                                                double minimumDistanceFromCliffBottoms)
+   public static PlanarRegion findHighestNearbyRegion(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics highestNearbyPointToPack,
+                                                      double minimumDistanceFromCliffBottoms)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+      PlanarRegion highestRegion = null;
+      highestNearbyPointToPack.setZ( Double.NEGATIVE_INFINITY);
 
       List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools
             .filterPlanarRegionsWithBoundingCircle(new Point2D(footInWorld), minimumDistanceFromCliffBottoms, planarRegionsList.getPlanarRegionsAsList());
@@ -51,18 +43,18 @@ public class CliffDetectionTools
          double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
          double distanceToPoint = footInWorld.distanceXY(closestPointInWorld);
 
-         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromFoot > maxZInSoleFrame)
+         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromFoot > highestNearbyPointToPack.getZ())
          {
-            maxZInSoleFrame = heightOfPointFromFoot;
+            highestRegion = intersectingRegion;
             highestNearbyPointToPack.set(closestPointInWorld);
          }
       }
 
-      return maxZInSoleFrame;
+      return highestRegion;
    }
 
-   public static double findHighestNearbyPoint2(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
-                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
+   public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
+                                               Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
       double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 

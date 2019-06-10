@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -15,12 +16,12 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
-   private final Point2D footPosition = new Point2D();
+   protected final Point2D footPosition = new Point2D();
 
    private final DoubleProvider projectionInsideDelta;
    private final BooleanProvider projectInsideUsingConvexHull;
-   private final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
-   private final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
+   protected final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
+   protected final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
                                                 BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
@@ -57,23 +58,30 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       }
       else
       {
-         double x = xIndex * FootstepNode.gridSizeXY + projectionTranslation.getX();
-         double xTranslated = x + projectionTranslation.getX();
-         double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
-         double yTranslated = y + projectionTranslation.getY();
-         double z = highestRegion.getPlaneZGivenXY(xTranslated, yTranslated);
-
-         Vector3D surfaceNormal = new Vector3D();
-         highestRegion.getNormal(surfaceNormal);
-
-         RigidBodyTransform snapTransform = PlanarRegionSnapTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
-         PlanarRegionSnapTools.setTranslationSettingZAndPreservingXAndY(x, y, xTranslated, yTranslated, z, snapTransform);
-
+         RigidBodyTransform snapTransform = getSnapTransformIncludingTranslation(footPosition, projectionTranslation, highestRegion);
          return new FootstepNodeSnapData(snapTransform);
       }
    }
 
-   private boolean isTranslationBiggerThanGridCell(Vector2D translation)
+   protected RigidBodyTransform getSnapTransformIncludingTranslation(Point2DReadOnly position, Vector2DReadOnly translation, PlanarRegion containingRegion)
+   {
+      double x = position.getX();
+      double xTranslated = x + translation.getX();
+      double y = position.getY();
+      double yTranslated = y + translation.getY();
+      double z = containingRegion.getPlaneZGivenXY(xTranslated, yTranslated);
+
+
+      Vector3D surfaceNormal = new Vector3D();
+      containingRegion.getNormal(surfaceNormal);
+
+      RigidBodyTransform snapTransform = PlanarRegionSnapTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
+      PlanarRegionSnapTools.setTranslationSettingZAndPreservingXAndY(x, y, xTranslated, yTranslated, z, snapTransform);
+
+      return snapTransform;
+   }
+
+   protected boolean isTranslationBiggerThanGridCell(Vector2D translation)
    {
       if (!constraintDataParameters.enforceTranslationLessThanGridCell)
          return false;

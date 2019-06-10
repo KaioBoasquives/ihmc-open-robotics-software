@@ -48,7 +48,7 @@ public class CliffDetectionToolsTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
 
       double heightToAvoid = 0.25;
-      Assert.assertEquals(CliffDetectionTools.findHighestNearbyPoint2(planarRegionsList, new Point3D(0.25, 0.0, 0.0), 0.0, new Point3D(), 0.2, -0.1, 0.1, -0.1), 0.3, 1e-5);
+      Assert.assertEquals(CliffDetectionTools.findHighestNearbyPoint(planarRegionsList, new Point3D(0.25, 0.0, 0.0), 0.0, new Point3D(), 0.2, -0.1, 0.1, -0.1), 0.3, 1e-5);
       Assert.assertTrue(CliffDetectionTools.isNearCliff(planarRegionsList, new Point3D(0.25, 0.0, 0.0), 0.0, heightToAvoid, 0.2, -0.1, 0.1, -0.1));
       heightToAvoid = 0.34;
       Assert.assertFalse(CliffDetectionTools.isNearCliff(planarRegionsList, new Point3D(0.25, 0.0, 0.0), 0.0, heightToAvoid, 0.2, -0.1, 0.1, -0.1));
