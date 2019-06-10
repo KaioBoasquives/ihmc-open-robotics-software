@@ -66,8 +66,8 @@ public class BodyPathHeuristics extends CostToGoHeuristics
          int nodeXIndex = node.getXIndex(robotQuadrant);
          int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         FootstepNodeSnapData goalNodeData = snapper.snapFootstepNode(goalNodeXIndex, goalNodeYIndex);
-         FootstepNodeSnapData nodeData = snapper.snapFootstepNode(nodeXIndex, nodeYIndex);
+         FootstepNodeSnapData goalNodeData = snapper.snapFootstepNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex);
+         FootstepNodeSnapData nodeData = snapper.snapFootstepNode(robotQuadrant, nodeXIndex, nodeYIndex);
 
          if (nodeData == null || goalNodeData == null)
          {

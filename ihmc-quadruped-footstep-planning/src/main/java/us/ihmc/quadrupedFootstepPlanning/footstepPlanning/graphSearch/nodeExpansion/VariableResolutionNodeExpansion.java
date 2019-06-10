@@ -42,7 +42,7 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
       int xIndex = node.getXIndex(movingQuadrant);
       int yIndex = node.getYIndex(movingQuadrant);
       RigidBodyTransform footTransformToWorld = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransformToWorld(xIndex, yIndex, snapper.snapFootstepNode(xIndex, yIndex).getSnapTransform(), footTransformToWorld);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(xIndex, yIndex, snapper.snapFootstepNode(node).getSnapTransform(), footTransformToWorld);
 
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);

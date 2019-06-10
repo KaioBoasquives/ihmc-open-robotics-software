@@ -418,7 +418,7 @@ public class ParameterBasedNodeExpansionTest
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(robotQuadrant, node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          footSnapTransform.transform(stepPosition);

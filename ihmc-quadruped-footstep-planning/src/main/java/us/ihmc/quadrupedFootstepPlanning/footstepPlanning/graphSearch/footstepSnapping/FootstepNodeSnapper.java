@@ -9,6 +9,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,6 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 {
    private final HashMap<SnapKey, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
-   private final TIntObjectMap<List<PlanarRegion>> nearbyPlanarRegions = new TIntObjectHashMap<>();
 
    protected final FootstepPlannerParameters parameters;
 
@@ -51,10 +51,10 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode node)
    {
-      return snapFootstepNode(node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
+      return snapFootstepNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
    }
 
-   public FootstepNodeSnapData snapFootstepNode(int xIndex, int yIndex)
+   public FootstepNodeSnapData snapFootstepNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
    {
       SnapKey key = new SnapKey(xIndex, yIndex);
       if (snapDataHolder.containsKey(key))
@@ -67,7 +67,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         FootstepNodeSnapData snapData = snapInternal(xIndex, yIndex);
+         FootstepNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex);
          addSnapData(xIndex, yIndex, snapData);
          return snapData;
       }
@@ -88,7 +88,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       return snapDataHolder.get(new SnapKey(xIndex, yIndex));
    }
 
-   protected abstract FootstepNodeSnapData snapInternal(int xIndex, int yIndex);
+   protected abstract FootstepNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex);
 
    private class SnapKey
    {

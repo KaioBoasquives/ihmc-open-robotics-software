@@ -337,9 +337,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          for (int i = 0; i < path.size(); i++)
          {
             FootstepNode node = path.get(i);
-            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
-            FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+            FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node);
             RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
             if (snapTransform.containsNaN())
@@ -405,7 +404,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node);
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
          position.applyTransform(snapTransform);

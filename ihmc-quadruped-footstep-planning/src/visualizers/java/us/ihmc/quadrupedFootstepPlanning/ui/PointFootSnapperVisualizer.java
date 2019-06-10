@@ -16,6 +16,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -69,7 +70,7 @@ public class PointFootSnapperVisualizer
       {
          for (int j = minYIndex; j <= maxYIndex; j++)
          {
-            FootstepNodeSnapData snapData = snapper.snapFootstepNode(i, j);
+            FootstepNodeSnapData snapData = snapper.snapFootstepNode(RobotQuadrant.FRONT_LEFT, i, j);
             Vector3DReadOnly snapTranslation = snapData.getSnapTransform().getTranslationVector();
 
             if(snapTranslation.containsNaN())

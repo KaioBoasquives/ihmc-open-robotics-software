@@ -30,6 +30,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
 
@@ -43,7 +44,7 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
    void testIssue20190603_WigglerViolateDeltaInsideRegionOnly()
    {
       DataSet dataSet = DataSetIOTools.loadDataSet("20190603_224047_PlanarRegionWigglerViolateDeltaInside");
-      
+
       PlanarRegion troublesomeRegion = dataSet.getPlanarRegionsList().getPlanarRegionsAsList().stream().filter(region -> region.isPointInside(new Point3D(-0.12, -0.51, -0.49), 0.01)).findFirst().get();
 
       ConvexPolygon2D planeToWiggleInto = troublesomeRegion.getConvexHull();
@@ -73,7 +74,7 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
             parameters.minY = -maxXY;
             parameters.maxYaw = 0.0;
             parameters.minYaw = -0.0;
-            
+
             ConvexPolygon2D wigglePolygon = PolygonWiggler.wigglePolygon(polygonToWiggle, planeToWiggleInto, parameters);
 
             double distanceInside = planeToWiggleInto.signedDistance(wigglePolygon.getCentroid());
@@ -204,7 +205,7 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
             if (!troublesomeRegion.isPointInWorld2DInside(new Point3D(gridX, gridY, 0.0), 1e-8))
                continue;
 
-            FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(xIndex, yIndex);
+            FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(RobotQuadrant.FRONT_LEFT, xIndex, yIndex);
 
             Point3D snappedPointInWorld = new Point3D(gridX, gridY, 0.0);
             snapData.getSnapTransform().transform(snappedPointInWorld);
@@ -249,6 +250,8 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
          assertTrue(premessage + "Pre-wiggle is out of the region with the world check.\n Point in world\n" + pointInWorldToWiggle, troublesomeRegion.isPointInWorld2DInside(pointInWorldToWiggle, 1e-8));
 
 
+         RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
+
          int xIndex = FootstepNode.snapToGrid(pointInWorldToWiggle.getX());
          int yIndex = FootstepNode.snapToGrid(pointInWorldToWiggle.getY());
          double gridX = FootstepNode.gridSizeXY * xIndex;
@@ -261,7 +264,7 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
          if (!troublesomeRegion.isPointInWorld2DInside(new Point3D(gridX, gridY, 0.0), 1e-8))
             continue;
 
-         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(xIndex, yIndex);
+         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(robotQuadrant, xIndex, yIndex);
 
          Point3D snappedPointInWorld = new Point3D(gridX, gridY, 0.0);
          snapData.getSnapTransform().transform(snappedPointInWorld);

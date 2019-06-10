@@ -96,11 +96,11 @@ public class FootstepNodeSnapperTest
 
                               testSnapper.dirtyBit = true;
                               String string = "i " + i + " j " + j + " k " + k + " l " + l + " m " + m + " n " + n + " o " + o + " p " + p;
-                              testSnapper.snapFootstepNode(xIndex, yIndex);
+                              testSnapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
                               assertTrue(string, testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
-                              testSnapper.snapFootstepNode(xIndex, yIndex);
+                              testSnapper.snapFootstepNode(robotQuadrant, xIndex, yIndex);
                               assertFalse(string, testSnapper.dirtyBit);
                            }
                         }
@@ -170,7 +170,7 @@ public class FootstepNodeSnapperTest
                                  break;
                               }
 
-                              FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(xIndex, yIndex);
+                              FootstepNodeSnapData snapData = testSnapper.snapFootstepNode(newQuadrant, xIndex, yIndex);
                               assertTrue(!testSnapper.dirtyBit);
                               assertTrue(snapData.getSnapTransform().epsilonEquals(new RigidBodyTransform(), epsilon));
                            }
@@ -231,7 +231,7 @@ public class FootstepNodeSnapperTest
       boolean dirtyBit = false;
 
       @Override
-      protected FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
+      protected FootstepNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
       {
          dirtyBit = true;
          return FootstepNodeSnapData.emptyData();
