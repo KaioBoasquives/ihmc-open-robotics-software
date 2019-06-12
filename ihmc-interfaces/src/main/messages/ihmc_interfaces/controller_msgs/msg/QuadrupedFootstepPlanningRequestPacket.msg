@@ -31,5 +31,7 @@ int32 planner_request_id -1
 byte requested_footstep_planner_type 255
 float64 timeout
 float64 horizon_length
+float64 obstacle_avoidance_radius -1.0
 PlanarRegionsListMessage planar_regions_list_message
 bool assume_flat_ground
+bool avoid_obstacles_in_swing true

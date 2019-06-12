@@ -67,9 +67,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoDouble timeout = new YoDouble("toolboxTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
+   private final YoDouble obstacleAvoidanceRadius = new YoDouble("obstacleAvoidanceRadius", registry);
+   private final YoBoolean avoidObstaclesInSwing = new YoBoolean("avoidObstaclesInSwing", registry);
 
    private final QuadrupedPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
-
 
    public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
                                               FootstepPlannerParameters defaultFootstepPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
@@ -82,20 +83,21 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
       footstepPlannerParameters = new YoFootstepPlannerParameters(defaultFootstepPlannerParameters, registry);
 
+      obstacleAvoidanceRadius.set(0.05);
       swingOverPlanarRegionsTrajectoryExpander = new QuadrupedPlanarRegionsTrajectoryExpander(registry, graphicsListRegistry);
 
       if (robotDataReceiver != null)
       {
          plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
-                        new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(), null, registry));
+                        new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters,
+                                                                   robotDataReceiver.getReferenceFrames(), null, registry));
          plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
                         new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
                                                                      robotDataReceiver.getReferenceFrames(), null, registry));
       }
-      plannerMap.put(FootstepPlannerType.A_STAR,
-                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
-                                                                                                    visibilityGraphParameters, graphicsListRegistry, registry));
+      plannerMap.put(FootstepPlannerType.A_STAR, QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
+                     new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings, visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -165,6 +167,10 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       QuadrupedFootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
+
+      if (request.getObstacleAvoidanceRadius() != -1.0)
+         obstacleAvoidanceRadius.set(request.getObstacleAvoidanceRadius());
+      avoidObstaclesInSwing.set(request.getAvoidObstaclesInSwing());
 
       planId.set(request.getPlannerRequestId());
       if (request.getRequestedFootstepPlannerType() >= 0)
@@ -342,7 +348,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       result.setFootstepPlanningResult(status.toByte());
       result.setTimeTaken(plannerMap.get(activePlanner.getEnumValue()).getPlanningDuration());
 
-      addObstacleAvoidanceWaypointsWhenNecessary(result.getFootstepDataList());
+      if (avoidObstaclesInSwing.getBooleanValue())
+         addObstacleAvoidanceWaypointsWhenNecessary(result.getFootstepDataList());
 
       return result;
    }
@@ -351,6 +358,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    {
       if (!planarRegionsList.isPresent())
          return;
+
+      swingOverPlanarRegionsTrajectoryExpander.setCollisionSphereRadius(obstacleAvoidanceRadius.getDoubleValue());
 
       QuadrantDependentList<FramePoint3D> footPositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -362,16 +371,15 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       FramePoint3D swingStartPosition = new FramePoint3D();
       FramePoint3D swingEndPosition = new FramePoint3D();
 
-
-      for (int stepIndex = 1; stepIndex < stepListMessage.getQuadrupedStepList().size(); stepIndex++)
+      for (int stepIndex = 0; stepIndex < stepListMessage.getQuadrupedStepList().size(); stepIndex++)
       {
          QuadrupedStepMessage stepMessage = stepListMessage.getQuadrupedStepList().get(stepIndex).getQuadrupedStepMessage();
          RobotQuadrant movingQuadrant = RobotQuadrant.fromByte(stepMessage.getRobotQuadrant());
          swingStartPosition.set(footPositions.get(movingQuadrant));
          swingEndPosition.set(stepMessage.getGoalPosition());
 
-
-         if (swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(swingStartPosition, swingEndPosition, 0.08, planarRegionsList.get(), null))
+         if (swingOverPlanarRegionsTrajectoryExpander
+               .expandTrajectoryOverPlanarRegions(swingStartPosition, swingEndPosition, xGaitSettings.getStepGroundClearance(), planarRegionsList.get(), null))
          {
             List<FramePoint3D> expandedWaypoints = swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints();
             for (int waypointIndex = 0; waypointIndex < expandedWaypoints.size(); waypointIndex++)
@@ -379,8 +387,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
                stepMessage.getCustomPositionWaypoints().add().set(expandedWaypoints.get(waypointIndex));
             }
          }
-
-
 
          footPositions.get(movingQuadrant).set(swingEndPosition);
       }

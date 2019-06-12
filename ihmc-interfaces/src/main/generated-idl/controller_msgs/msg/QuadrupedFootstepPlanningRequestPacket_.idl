@@ -68,8 +68,12 @@ module controller_msgs
         octet requested_footstep_planner_type;
         double timeout;
         double horizon_length;
+        @defaultValue(value=-1.0)
+        double obstacle_avoidance_radius;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
         boolean assume_flat_ground;
+        @defaultValue(value=True)
+        boolean avoid_obstacles_in_swing;
       };
     };
   };
