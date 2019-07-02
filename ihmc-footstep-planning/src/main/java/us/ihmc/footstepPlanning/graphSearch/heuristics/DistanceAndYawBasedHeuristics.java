@@ -30,36 +30,25 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    {
       Point2D goalPoint = goalNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
       Point2D nodeMidFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-
-
-
-
-
-
-
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
 
       double referenceYaw = computeReferenceYaw(node, goalNode);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw);
 
-
-
-      RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
-
-      FootstepNodeTools.getSnappedNodeTransform(node, snapper.snapFootstepNode(node).getSnapTransform(), nodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(goalNode, snapper.snapFootstepNode(goalNode).getSnapTransform(), goalNodeTransform);
+      RigidBodyTransform nodeSnapTransform = snapper.snapFootstepNode(node).getSnapTransform();
+      RigidBodyTransform goalNodeSnapTransform = snapper.snapFootstepNode(goalNode).getSnapTransform();
 
       double heightCost = 0.0;
 
-      if (!nodeTransform.containsNaN() && !goalNodeTransform.containsNaN())
+      if (!nodeSnapTransform.containsNaN() && !goalNodeSnapTransform.containsNaN())
       {
-         double heightChange = goalNodeTransform.getTranslationVector().getZ() - nodeTransform.getTranslationVector().getZ();
+         double heightChange = goalNodeSnapTransform.getTranslationVector().getZ() - nodeSnapTransform.getTranslationVector().getZ();
 
+         // add a two times multiplier because both feet have to move
          if (heightChange > 0)
-            heightCost = costParameters.getStepUpWeight() * heightChange;
+            heightCost = costParameters.getStepUpWeight() * 2.0 * heightChange;
          else
-            heightCost = -costParameters.getStepDownWeight() * heightChange;
+            heightCost = -costParameters.getStepDownWeight() * 2.0 * heightChange;
       }
 
       double minSteps = euclideanDistance / parameters.getMaximumStepReach() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
