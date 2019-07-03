@@ -138,6 +138,14 @@ public interface FootstepPlannerCostParameters
    }
 
    /**
+    * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+    */
+   default double getFootholdAreaWeight()
+   {
+      return 1.0;
+   }
+
+   /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
     * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
