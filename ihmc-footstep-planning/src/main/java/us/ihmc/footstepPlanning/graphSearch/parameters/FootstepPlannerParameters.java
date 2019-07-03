@@ -27,15 +27,16 @@ public interface FootstepPlannerParameters
 
    /**
     * Returns the ideal step width for walking on flat ground.
-    * This is ONLY used when assumed to be walking on flat ground.
     */
    double getIdealFootstepWidth();
 
    /**
     * Returns the ideal step length for walking on flat ground.
-    * This is ONLY used when assumed to be walking on flat ground.
     */
-   double getIdealFootstepLength();
+   default double getIdealFootstepLength()
+   {
+      return getMaximumStepReach();
+   }
 
    /**
     * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer

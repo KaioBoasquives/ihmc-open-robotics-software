@@ -113,6 +113,9 @@ public class FootstepPlannerMessageTools
       packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
       packet.getCostParameters().setBoundingBoxCost(costParameters.getBoundingBoxCost());
       packet.getCostParameters().setMaximum2dDistanceFromBoundingBoxToPenalize(costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+
+      packet.getCostParameters().setFootholdAreaWeight(costParameters.getFootholdAreaWeight());
+      packet.getCostParameters().setLongStepWeight(costParameters.getLongStepWeight());
    }
 
    public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)

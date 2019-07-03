@@ -29,6 +29,10 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
             */
    public double roll_weight_ = -1.0;
    /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double foothold_area_weight_ = -1.0;
+   /**
             * When using a cost based planning approach, this value defines how the forward (or backward) displacement
             * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
             * weight is averaged with the value returned by {@link #getLateralWeight()}
@@ -40,6 +44,10 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
             * weight is averaged with the value returned by {@link #getForwardWeight()}
             */
    public double lateral_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double long_step_weight_ = -1.0;
    /**
             * When using a cost based planning approach this value defines how the height change when stepping up will be
             * weighted.
@@ -111,9 +119,13 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       roll_weight_ = other.roll_weight_;
 
+      foothold_area_weight_ = other.foothold_area_weight_;
+
       forward_weight_ = other.forward_weight_;
 
       lateral_weight_ = other.lateral_weight_;
+
+      long_step_weight_ = other.long_step_weight_;
 
       step_up_weight_ = other.step_up_weight_;
 
@@ -202,6 +214,21 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
    }
 
    /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public void setFootholdAreaWeight(double foothold_area_weight)
+   {
+      foothold_area_weight_ = foothold_area_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double getFootholdAreaWeight()
+   {
+      return foothold_area_weight_;
+   }
+
+   /**
             * When using a cost based planning approach, this value defines how the forward (or backward) displacement
             * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
             * weight is averaged with the value returned by {@link #getLateralWeight()}
@@ -237,6 +264,21 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
    public double getLateralWeight()
    {
       return lateral_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public void setLongStepWeight(double long_step_weight)
+   {
+      long_step_weight_ = long_step_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double getLongStepWeight()
+   {
+      return long_step_weight_;
    }
 
    /**
@@ -442,9 +484,13 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.roll_weight_, other.roll_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foothold_area_weight_, other.foothold_area_weight_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_weight_, other.forward_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_weight_, other.lateral_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.long_step_weight_, other.long_step_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_up_weight_, other.step_up_weight_, epsilon)) return false;
 
@@ -489,9 +535,13 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if(this.roll_weight_ != otherMyClass.roll_weight_) return false;
 
+      if(this.foothold_area_weight_ != otherMyClass.foothold_area_weight_) return false;
+
       if(this.forward_weight_ != otherMyClass.forward_weight_) return false;
 
       if(this.lateral_weight_ != otherMyClass.lateral_weight_) return false;
+
+      if(this.long_step_weight_ != otherMyClass.long_step_weight_) return false;
 
       if(this.step_up_weight_ != otherMyClass.step_up_weight_) return false;
 
@@ -533,10 +583,14 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       builder.append(this.pitch_weight_);      builder.append(", ");
       builder.append("roll_weight=");
       builder.append(this.roll_weight_);      builder.append(", ");
+      builder.append("foothold_area_weight=");
+      builder.append(this.foothold_area_weight_);      builder.append(", ");
       builder.append("forward_weight=");
       builder.append(this.forward_weight_);      builder.append(", ");
       builder.append("lateral_weight=");
       builder.append(this.lateral_weight_);      builder.append(", ");
+      builder.append("long_step_weight=");
+      builder.append(this.long_step_weight_);      builder.append(", ");
       builder.append("step_up_weight=");
       builder.append(this.step_up_weight_);      builder.append(", ");
       builder.append("step_down_weight=");

@@ -14,6 +14,10 @@ float64 pitch_weight
 # Field default value -1.0
 float64 roll_weight
 
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+# Field default value -1.0
+float64 foothold_area_weight
+
 # When using a cost based planning approach, this value defines how the forward (or backward) displacement
 # of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
 # weight is averaged with the value returned by {@link #getLateralWeight()}
@@ -25,6 +29,10 @@ float64 forward_weight
 # weight is averaged with the value returned by {@link #getForwardWeight()}
 # Field default value -1.0
 float64 lateral_weight
+
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+# Field default value -1.0
+float64 long_step_weight
 
 # When using a cost based planning approach this value defines how the height change when stepping up will be
 # weighted.

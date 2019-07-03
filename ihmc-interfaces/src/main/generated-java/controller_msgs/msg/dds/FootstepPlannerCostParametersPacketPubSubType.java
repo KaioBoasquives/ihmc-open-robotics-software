@@ -58,6 +58,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -88,6 +92,12 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -152,9 +162,13 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getRollWeight());
 
+      cdr.write_type_6(data.getFootholdAreaWeight());
+
       cdr.write_type_6(data.getForwardWeight());
 
       cdr.write_type_6(data.getLateralWeight());
+
+      cdr.write_type_6(data.getLongStepWeight());
 
       cdr.write_type_6(data.getStepUpWeight());
 
@@ -190,9 +204,13 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       	
       data.setRollWeight(cdr.read_type_6());
       	
+      data.setFootholdAreaWeight(cdr.read_type_6());
+      	
       data.setForwardWeight(cdr.read_type_6());
       	
       data.setLateralWeight(cdr.read_type_6());
+      	
+      data.setLongStepWeight(cdr.read_type_6());
       	
       data.setStepUpWeight(cdr.read_type_6());
       	
@@ -226,8 +244,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       ser.write_type_6("yaw_weight", data.getYawWeight());
       ser.write_type_6("pitch_weight", data.getPitchWeight());
       ser.write_type_6("roll_weight", data.getRollWeight());
+      ser.write_type_6("foothold_area_weight", data.getFootholdAreaWeight());
       ser.write_type_6("forward_weight", data.getForwardWeight());
       ser.write_type_6("lateral_weight", data.getLateralWeight());
+      ser.write_type_6("long_step_weight", data.getLongStepWeight());
       ser.write_type_6("step_up_weight", data.getStepUpWeight());
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
@@ -248,8 +268,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       data.setYawWeight(ser.read_type_6("yaw_weight"));
       data.setPitchWeight(ser.read_type_6("pitch_weight"));
       data.setRollWeight(ser.read_type_6("roll_weight"));
+      data.setFootholdAreaWeight(ser.read_type_6("foothold_area_weight"));
       data.setForwardWeight(ser.read_type_6("forward_weight"));
       data.setLateralWeight(ser.read_type_6("lateral_weight"));
+      data.setLongStepWeight(ser.read_type_6("long_step_weight"));
       data.setStepUpWeight(ser.read_type_6("step_up_weight"));
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));

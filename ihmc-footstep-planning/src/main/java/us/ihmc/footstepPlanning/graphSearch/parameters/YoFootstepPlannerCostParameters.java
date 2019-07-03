@@ -29,6 +29,9 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    private final YoDouble maximum2dDistanceFromBoundingBoxToPenalize = new YoDouble("maximum2dDistanceFromBoundingBoxToPenalize", registry);
    private final YoDouble boundingBoxCost = new YoDouble("boundingBoxCost", registry);
 
+   private final YoDouble longStepWeight = new YoDouble("longStepWeight", registry);
+   private final YoDouble footholdAreaWeight = new YoDouble("footholdAreaWeight", registry);
+
    public YoFootstepPlannerCostParameters(YoVariableRegistry parentRegistry, FootstepPlannerCostParameters defaults)
    {
       parentRegistry.addChild(registry);
@@ -55,6 +58,9 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
       setCostPerStep(defaults.getCostPerStep());
       setMaximum2dDistanceFromBoundingBoxToPenalize(defaults.getMaximum2dDistanceFromBoundingBoxToPenalize());
       setBoundingBoxCost(defaults.getBoundingBoxCost());
+
+      setFootholdAreaWeight(defaults.getFootholdAreaWeight());
+      setLongStepWeight(defaults.getLongStepWeight());
    }
 
    @Override
@@ -153,6 +159,18 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
       return boundingBoxCost.getDoubleValue();
    }
 
+   @Override
+   public double getFootholdAreaWeight()
+   {
+      return footholdAreaWeight.getDoubleValue();
+   }
+
+   @Override
+   public double getLongStepWeight()
+   {
+      return longStepWeight.getDoubleValue();
+   }
+
    public void set(FootstepPlannerCostParametersPacket parametersPacket)
    {
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
@@ -187,6 +205,11 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
          setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
       if (parametersPacket.getBoundingBoxCost() != -1.0)
          setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
+
+      if (parametersPacket.getFootholdAreaWeight() != -1.0)
+         setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
+      if (parametersPacket.getLongStepWeight() != -1.0)
+         setLongStepWeight(parametersPacket.getLongStepWeight());
    }
 
    public void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
@@ -267,5 +290,15 @@ public class YoFootstepPlannerCostParameters implements FootstepPlannerCostParam
    public void setBoundingBoxCost(double boundingBoxCost)
    {
       this.boundingBoxCost.set(boundingBoxCost);
+   }
+
+   public void setFootholdAreaWeight(double footholdAreaWeight)
+   {
+      this.footholdAreaWeight.set(footholdAreaWeight);
+   }
+
+   public void setLongStepWeight(double longStepWeight)
+   {
+      this.longStepWeight.set(longStepWeight);
    }
 }

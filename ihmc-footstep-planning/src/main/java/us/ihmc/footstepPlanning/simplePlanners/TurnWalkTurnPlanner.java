@@ -294,12 +294,6 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       }
 
       @Override
-      public double getIdealFootstepLength()
-      {
-         return 0.45;
-      }
-
-      @Override
       public double getMaximumStepYaw()
       {
          return Math.toRadians(20.0);
@@ -314,7 +308,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       @Override
       public double getMaximumStepReach()
       {
-         return getIdealFootstepLength();
+          return 0.45;
       }
 
       @Override

@@ -24,6 +24,9 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    private double boundingBoxCost;
    private double maximum2dDistanceFromBoundingBoxToPenalize;
 
+   private double longStepWeight;
+   private double footholdAreaWeight;
+
    private final DoubleProvider aStarHeuristicsProvider = () -> aStarHeuristicsWeight;
    private final DoubleProvider visGraphWithAStarHeuristicsProvider = () -> visGraphWithAStarHeuristicsWeight;
    private final DoubleProvider depthFirstHeuristicsProvider = () -> depthFirstHeuristicsWeight;
@@ -47,6 +50,8 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
       this.lateralWeight = parameters.getLateralWeight();
       this.stepUpWeight = parameters.getStepUpWeight();
       this.stepDownWeight = parameters.getStepDownWeight();
+      this.longStepWeight = parameters.getLongStepWeight();
+      this.footholdAreaWeight = parameters.getFootholdAreaWeight();
 
       this.aStarHeuristicsWeight = parameters.getAStarHeuristicsWeight().getValue();
       this.visGraphWithAStarHeuristicsWeight = parameters.getVisGraphWithAStarHeuristicsWeight().getValue();
@@ -134,6 +139,11 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
       this.maximum2dDistanceFromBoundingBoxToPenalize = maximum2dDistanceFromBoundingBoxToPenalize;
+   }
+
+   public void setFootholdAreaWeight(double areaWeight)
+   {
+      this.footholdAreaWeight = areaWeight;
    }
 
    @Override
@@ -230,5 +240,17 @@ public class SettableFootstepPlannerCostParameters implements FootstepPlannerCos
    public double getBoundingBoxCost()
    {
       return boundingBoxCost;
+   }
+
+   @Override
+   public double getLongStepWeight()
+   {
+      return longStepWeight;
+   }
+
+   @Override
+   public double getFootholdAreaWeight()
+   {
+      return footholdAreaWeight;
    }
 }

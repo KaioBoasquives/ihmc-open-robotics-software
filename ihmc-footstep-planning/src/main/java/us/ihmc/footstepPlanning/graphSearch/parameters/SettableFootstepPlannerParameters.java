@@ -362,6 +362,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.costParameters.setBoundingBoxCost(boundingBoxCost);
    }
 
+   public void setFootholdAreaWeight(double areaWeight)
+   {
+      this.costParameters.setFootholdAreaWeight(areaWeight);
+   }
+
    @Override
    public double getIdealFootstepWidth()
    {
@@ -656,6 +661,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getBodyPathBasedHeuristicsWeight()
    {
       return costParameters.getBodyPathBasedHeuristicsWeight().getValue();
+   }
+
+   public double getLongStepWeight()
+   {
+      return costParameters.getLongStepWeight();
+   }
+
+   public double getFootholdAreaWeight()
+   {
+      return costParameters.getFootholdAreaWeight();
    }
 
    @Override

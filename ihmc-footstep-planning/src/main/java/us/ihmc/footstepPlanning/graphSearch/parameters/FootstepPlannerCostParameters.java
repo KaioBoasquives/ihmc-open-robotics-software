@@ -138,6 +138,14 @@ public interface FootstepPlannerCostParameters
    }
 
    /**
+    * When using a cost based planning approach this value defines the weight of the step distance of a step longer than {@link FootstepPlannerParameters#getIdealFootstepLength()} .
+    */
+   default double getLongStepWeight()
+   {
+      return 1.0;
+   }
+
+   /**
     * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
     */
    default double getFootholdAreaWeight()
