@@ -38,8 +38,17 @@ public class QuadraticDistanceAndYawCost implements FootstepCost
       endNodePosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), endPoint, 0.0);
       endNodePosition.changeFrame(startNodeFrame);
 
-      double cost = costParameters.getForwardWeight() * Math.pow(endNodePosition.getX(), 2.0);
-      cost += costParameters.getLateralWeight() * Math.pow(endNodePosition.getY(), 2.0);
+      double stepDistance = endNodePosition.distanceFromOrigin();
+      double cost;
+      if (stepDistance > parameters.getIdealFootstepLength())
+      {
+         cost = costParameters.getLongStepWeight() * stepDistance;
+      }
+      else
+      {
+         cost = costParameters.getForwardWeight() * Math.pow(endNodePosition.getX(), 2.0);
+         cost += costParameters.getLateralWeight() * Math.pow(endNodePosition.getY(), 2.0);
+      }
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
       cost += costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep();
