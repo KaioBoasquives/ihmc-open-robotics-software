@@ -130,7 +130,7 @@ public class LidarImageFusionProcessorUI
       pointCloudAnchorPaneController.attachREAMessager(reaMessager);
       pointCloudAnchorPaneController.bindControls();
 
-      imageProcessingAnchorPaneController.initialize(messager);
+      imageProcessingAnchorPaneController.initialize(messager, reaMessager);
       objectDetectionAnchorPaneController.initialize(messager);
       stereoREAAnchorPaneController.initialize(messager);
    }
