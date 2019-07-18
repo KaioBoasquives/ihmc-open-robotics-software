@@ -14,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 
 public class FusionSensorImageViewer
@@ -80,10 +81,20 @@ public class FusionSensorImageViewer
       if (newBufferedImageToView.get() != null)
          imagesToView.add(newBufferedImageToView.getAndSet(null));
 
+      Image32 streamingImage;
       if (newImageMessageToStream.get() == null)
-         return;
-
-      unpackImage(newImageMessageToStream.getAndSet(null));
+      {
+         streamingImage = new Image32();
+         streamingImage.setWidth(ImageProcessingAnchorPaneController.defaultImageWidth);
+         streamingImage.setHeight(ImageProcessingAnchorPaneController.defaultImageHeight);
+         for (int i = 0; i < ImageProcessingAnchorPaneController.defaultImageWidth * ImageProcessingAnchorPaneController.defaultImageHeight; i++)
+            streamingImage.getRgbdata().add(0);
+      }
+      else
+      {
+         streamingImage = newImageMessageToStream.getAndSet(null);
+      }
+      unpackImage(streamingImage);
 
       if (snapshot.getAndSet(false))
       {
