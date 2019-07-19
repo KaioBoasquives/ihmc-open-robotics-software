@@ -30,14 +30,9 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper
 public class ImageProcessingAnchorPaneController
 {
    private JavaFXMessager messager;
-   @FXML
-   private ToggleButton btnEnableStreaming;
-
-   @FXML
-   private Button btnTaskingSnapshot;
-
-   @FXML
-   private Button btnClearImageView;
+   @FXML private ToggleButton btnEnableStreaming;
+   @FXML private Button btnTaskingSnapshot;
+   @FXML private Button btnClearImageView;
 
    public void initialize(JavaFXMessager messager, REAUIMessager uiMessager)
    {
