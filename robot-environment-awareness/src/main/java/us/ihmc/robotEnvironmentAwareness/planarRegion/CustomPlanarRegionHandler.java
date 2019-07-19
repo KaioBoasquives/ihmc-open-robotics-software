@@ -42,7 +42,7 @@ public class CustomPlanarRegionHandler
     * When merging a custom region to an estimated region, the edges are simply added as
     * intersections which are used in the polygonization.
     * </p>
-    * 
+    *
     * @param customRegions the planar regions provided from outside REA. Not modified.
     * @param estimatedRegions the current segmentation data obtained from the sensor(s). Modified:
     *           any custom region may be merged to these estimated regions.
@@ -62,8 +62,8 @@ public class CustomPlanarRegionHandler
       while (atLeastOneRegionWasMerged)
       {
          currentUnmergedRegions = previousUnmergedRegions.stream()
-                                                         .filter(customRegion -> mergeCustomRegionToEstimatedRegions(customRegion, estimatedRegions,
-                                                                                                                     parameters) == null)
+                                                         .filter(customRegion -> mergeCustomRegionToEstimatedRegions(customRegion, estimatedRegions, parameters)
+                                                                                 == null)
                                                          .collect(Collectors.toList());
 
          atLeastOneRegionWasMerged = currentUnmergedRegions.size() < previousUnmergedRegions.size();
@@ -81,7 +81,8 @@ public class CustomPlanarRegionHandler
 
       for (PlanarRegionSegmentationRawData estimatedRegion : estimatedRegions)
       {
-         if (!isCustomRegionMergeableToEstimatedRegion(customRegion, estimatedRegion, parameters))
+         boolean is = isCustomRegionMergeableToEstimatedRegion(customRegion, estimatedRegion, parameters);
+         if (!is)
             continue;
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -94,6 +95,7 @@ public class CustomPlanarRegionHandler
          for (Point3D vertex : vertices)
          {
             estimatedRegion.addIntersection(new LineSegment3D(previousVertex, vertex));
+
             previousVertex = vertex;
          }
 
@@ -103,12 +105,14 @@ public class CustomPlanarRegionHandler
       return modifiedEstimatedRegions.isEmpty() ? null : modifiedEstimatedRegions;
    }
 
-   private static boolean isCustomRegionMergeableToEstimatedRegion(PlanarRegion customRegion, PlanarRegionSegmentationRawData estimatedRegion,
+   private static boolean isCustomRegionMergeableToEstimatedRegion(PlanarRegion customRegion,
+                                                                   PlanarRegionSegmentationRawData estimatedRegion,
                                                                    CustomRegionMergeParameters parameters)
    {
       double maxDistanceFromPlane = parameters.getMaxDistanceFromPlane();
 
-      double distanceFromPlane = EuclidGeometryTools.distanceFromPoint3DToPlane3D(customRegion.getPlane().getPoint(), estimatedRegion.getOrigin(),
+      double distanceFromPlane = EuclidGeometryTools.distanceFromPoint3DToPlane3D(customRegion.getPlane().getPoint(),
+                                                                                  estimatedRegion.getOrigin(),
                                                                                   estimatedRegion.getNormal());
       if (distanceFromPlane > maxDistanceFromPlane)
          return false;
@@ -126,11 +130,16 @@ public class CustomPlanarRegionHandler
 
       double bbxDistance = REAGeometryTools.distanceSquaredBetweenTwoBoundingBox3Ds(estimatedRegion.getBoundingBoxInWorld().getMinPoint(),
                                                                                     estimatedRegion.getBoundingBoxInWorld().getMaxPoint(),
-                                                                                    customRegionBBX.getMinPoint(), customRegionBBX.getMaxPoint());
+                                                                                    customRegionBBX.getMinPoint(),
+                                                                                    customRegionBBX.getMaxPoint());
       if (bbxDistance > searchRadiusSquared)
          return false;
 
-      return estimatedRegion.getPointCloudInWorld().parallelStream().map(Point3D::new).peek(customRegion::transformFromWorldToLocal).map(Point2D::new)
+      return estimatedRegion.getPointCloudInWorld()
+                            .parallelStream()
+                            .map(Point3D::new)
+                            .peek(customRegion::transformFromWorldToLocal)
+                            .map(Point2D::new)
                             .anyMatch(point -> customRegion.distanceToPoint(point) < searchRadius);
    }
 }
