@@ -15,7 +15,6 @@ public class StereoPointCloudFilter implements PointCloudFilterInterface
 {
    private Point3D[] inputPoints = null;
    private Point3D[] outputPoints = null;
-   private Point3D[] noisePoints = null;
 
    private static final int DEFAULT_DOWN_SAMPLING_SIZE = 1;
 
@@ -108,9 +107,14 @@ public class StereoPointCloudFilter implements PointCloudFilterInterface
          int[] downSamplingPixel = new int[2];
          downSamplingPixel[0] = pixel[0] / downSamplingSize;
          downSamplingPixel[1] = pixel[1] / downSamplingSize;
+
+         if (downSamplingPixel[0] < 0 || downSamplingPixel[0] >= downSamplingWidth || downSamplingPixel[1] < 0 || downSamplingPixel[1] >= downSamplingHeight)
+            continue;
+
+         System.out.println(downSamplingPixel[0] + " " + downSamplingPixel[1] + " " + pixel[0] + " " + pixel[1]);
          int arrayIndex = getArrayIndex(downSamplingPixel[0], downSamplingPixel[1]);
          pointsHolder[arrayIndex].add(new Point3D(point));
-         pixelOccupancyHolder[i] = true;
+         pixelOccupancyHolder[arrayIndex] = true;
       }
 
       // filter in pixel level.
@@ -126,6 +130,7 @@ public class StereoPointCloudFilter implements PointCloudFilterInterface
       for (int i = 0; i < numberOfOccupiedPixel; i++)
          outputPoints[i] = new Point3D();
 
+      int index = 0;
       for (int i = 0; i < downSamplingWidth * downSamplingHeight; i++)
       {
          if (pixelOccupancyHolder[i])
@@ -142,7 +147,8 @@ public class StereoPointCloudFilter implements PointCloudFilterInterface
                   representativePoint.set(pointsHolder[i].get(j));
                }
             }
-            outputPoints[i].set(representativePoint);
+            outputPoints[index].set(representativePoint);
+            index++;
          }
       }
    }
@@ -151,11 +157,6 @@ public class StereoPointCloudFilter implements PointCloudFilterInterface
    public Point3D[] getOutput()
    {
       return outputPoints;
-   }
-
-   public Point3D[] getNoise()
-   {
-      return noisePoints;
    }
 
    private int getArrayIndex(int u, int v)

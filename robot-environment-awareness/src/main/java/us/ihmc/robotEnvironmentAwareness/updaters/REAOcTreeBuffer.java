@@ -1,10 +1,13 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -16,6 +19,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.filter.StereoPointCloudFilter;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class REAOcTreeBuffer
@@ -47,6 +51,8 @@ public class REAOcTreeBuffer
    private final Topic<Integer> ocTreeCapacityTopic;
    private final Topic<Integer> messageCapacityTopic;
    private final Topic<NormalOcTreeMessage> stateTopic;
+
+   private final StereoPointCloudFilter stereoPointCloudFilter = new StereoPointCloudFilter(1024, 544, 8);
 
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
@@ -206,7 +212,8 @@ public class REAOcTreeBuffer
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+         //scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+         scanCollection.addScan(toScan(stereoPointCloudFilter, stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
       }
    }
 
@@ -224,5 +231,45 @@ public class REAOcTreeBuffer
          pointCloud.add(x, y, z);
       }
       return new Scan(sensorPosition, pointCloud);
+   }
+
+   private static Scan toScan(StereoPointCloudFilter stereoPointCloudFilter, Float data, Point3DReadOnly sensorPosition)
+   {
+      PointCloud pointCloud = new PointCloud();
+
+      int bufferIndex = 0;
+
+      while (bufferIndex < data.size())
+      {
+         float x = data.getQuick(bufferIndex++);
+         float y = data.getQuick(bufferIndex++);
+         float z = data.getQuick(bufferIndex++);
+         pointCloud.add(x, y, z);
+      }
+
+      stereoPointCloudFilter.initialize();
+      stereoPointCloudFilter.setCameraPosition(sensorPosition);
+
+      List<Point3D> points = new ArrayList<Point3D>();
+      pointCloud.stream().forEach(point -> points.add(new Point3D(point)));
+      
+      Point3D[] inputPoints = new Point3D[points.size()];
+      for (int i = 0; i < points.size(); i++)
+      {
+         inputPoints[i] = new Point3D(points.get(i));
+      }
+
+      stereoPointCloudFilter.updateInput(inputPoints);
+      stereoPointCloudFilter.calculate();
+      Point3D[] output = stereoPointCloudFilter.getOutput();
+
+      PointCloud filteredPointCloud = new PointCloud();
+      bufferIndex = 0;
+      while (bufferIndex < output.length)
+      {
+         filteredPointCloud.add(output[bufferIndex]);
+         bufferIndex++;
+      }
+      return new Scan(sensorPosition, filteredPointCloud);
    }
 }

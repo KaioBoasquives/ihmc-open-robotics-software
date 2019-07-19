@@ -45,10 +45,14 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
    private final Scanner commandScanner;
    private static final String commandToSaveStereoVisionPointCloudData = "s";
    private static final String commandToSaveProjectedData = "p";
+   private static final String commandToShowProjectedImage = "i";
+   private static final String commandToShowFilteredProjectedImage = "f";
    private int savingIndex = 0;
 
    private AtomicReference<Boolean> saveStereoVisionPointCloud = new AtomicReference<Boolean>(false);
    private AtomicReference<Boolean> saveProjectedData = new AtomicReference<Boolean>(false);
+   private AtomicReference<Boolean> showProjectedImage = new AtomicReference<Boolean>(false);
+   private AtomicReference<Boolean> showFilteredProjectedImage = new AtomicReference<Boolean>(false);
 
    public MultisenseStereoVisionPointCloudROS1Bridge() throws URISyntaxException
    {
@@ -80,6 +84,16 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
                {
                   saveProjectedData.set(true);
                   System.out.println(commandToSaveProjectedData + " pressed");
+               }
+               else if (command.contains(commandToShowProjectedImage))
+               {
+                  showProjectedImage.set(true);
+                  System.out.println(commandToShowProjectedImage + " pressed");
+               }
+               else if (command.contains(commandToShowFilteredProjectedImage))
+               {
+                  showFilteredProjectedImage.set(true);
+                  System.out.println(commandToShowFilteredProjectedImage + " pressed");
                }
             }
          }
@@ -185,6 +199,16 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
             e.printStackTrace();
          }
          savingIndex++;
+      }
+      
+      if (showProjectedImage.getAndSet(false))
+      {
+         
+      }
+      
+      if (showFilteredProjectedImage.getAndSet(false))
+      {
+         
       }
    }
 

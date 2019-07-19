@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -22,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.filter.StereoPointCloudFilter;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 
@@ -142,7 +144,7 @@ public class ImageProcessingAnchorPaneController
 
    private AtomicReference<StereoVisionPointCloudMessage> stereoPointCloudMessage;
    public static final int defaultImageWidth = 1024;
-   public static final int defaultImageHeight = 1024;
+   public static final int defaultImageHeight = 544;
 
    public void showProjection()
    {
@@ -173,10 +175,54 @@ public class ImageProcessingAnchorPaneController
    public void showFilteredProjection()
    {
       LogTools.info("showFilteredProjection");
+
+      StereoVisionPointCloudMessage stereoVisionPointCloudMessage = stereoPointCloudMessage.get();
+      Point3D[] pointCloudBuffer = MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage);
+
+      for (int i = 0; i < pointCloudBuffer.length; i++)
+      {
+         Point3D point = pointCloudBuffer[i];
+         if (point == null)
+            break;
+      }
+
+      StereoPointCloudFilter filter = new StereoPointCloudFilter(defaultImageWidth, defaultImageHeight, 12);
+      filter.initialize();
+      filter.updateInput(pointCloudBuffer);
+      filter.calculate();
+      Point3D[] filteredPoints = filter.getOutput();
+      float[] filteredPointsBuffer = new float[filteredPoints.length * 3];
+      int[] filteredColors = new int[filteredPoints.length];
+      
+      BufferedImage projectedImage = new BufferedImage(defaultImageWidth, defaultImageHeight, BufferedImage.TYPE_INT_RGB);
+      for (int i = 0; i < filteredPoints.length; i++)
+      {
+         filteredPointsBuffer[i * 3 + 0] = (float) filteredPoints[i].getX();
+         filteredPointsBuffer[i * 3 + 1] = (float) filteredPoints[i].getY();
+         filteredPointsBuffer[i * 3 + 2] = (float) filteredPoints[i].getZ();
+         filteredColors[i] = 0;
+         
+         Point3D point = pointCloudBuffer[i];
+         if (point == null)
+            break;
+         int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, MultisenseInformation.CART.getIntrinsicParameters(), new Point3D(),
+                                                                                     new Quaternion());
+
+         if (pixel[0] < 0 || pixel[0] >= defaultImageWidth || pixel[1] < 0 || pixel[1] >= defaultImageHeight)
+            continue;
+
+         projectedImage.setRGB(pixel[0], pixel[1], 0xFFFFFF);
+      }
+      messager.submitMessage(LidarImageFusionAPI.ImageResultState, projectedImage);
+      
+      StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(0, filteredPointsBuffer, filteredColors);
+      reaMessager.submitMessageInternal(REAModuleAPI.StereoVisionPointCloudState, stereoVisionMessage);
+      
    }
 
    public void showFilteredPoints()
    {
       LogTools.info("showFilteredPoints");
+      
    }
 }
