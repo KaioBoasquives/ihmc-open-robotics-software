@@ -376,11 +376,6 @@ public class RemoteQuadrupedTeleopManager
       }
    }
 
-   public void setShiftPlanBasedOnStepAdjustment(boolean shift)
-   {
-      networkProcessor.setShiftPlanBasedOnStepAdjustment(shift);
-   }
-
    public void setXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.xGaitSettings.set(xGaitSettings);
