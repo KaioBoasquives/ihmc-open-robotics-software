@@ -177,6 +177,7 @@ public class RemoteQuadrupedTeleopManager
    {
       QuadrupedTeleopMessage teleopMessage = new QuadrupedTeleopMessage();
       teleopMessage.setRequestWalk(false);
+      teleopMessage.getXGaitSettings().set(xGaitSettings.getAsPacket());
       desiredVelocityPublisher.publish(teleopMessage);
 
       requestStopWalking();
