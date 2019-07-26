@@ -36,7 +36,7 @@ public class StereoREAModule implements Runnable
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
-
+   
    public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
@@ -45,11 +45,15 @@ public class StereoREAModule implements Runnable
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
-
+      
       planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
                                                                              subscriberTopicNameGenerator);
 
       initializeREAPlanarRegionPublicNetworkProvider();
+      
+      messager.registerTopicListener(LidarImageFusionAPI.LoadSavedData, (content) -> loadSavedData());
+      messager.registerTopicListener(LidarImageFusionAPI.CalculatePlanarRegions, (content) -> calculatePlanarRegions());
+      messager.registerTopicListener(LidarImageFusionAPI.DoSLAM, (content) -> doSLAM());
    }
 
    private void initializeREAPlanarRegionPublicNetworkProvider()
@@ -132,5 +136,20 @@ public class StereoREAModule implements Runnable
          planarRegionNetworkProvider.update(true);
          planarRegionNetworkProvider.publishCurrentState();
       }
+   }
+
+   private void loadSavedData()
+   {
+      System.out.println("loadSavedData");
+   }
+   
+   private void calculatePlanarRegions()
+   {
+      System.out.println("calculatePlanarRegions");
+   }
+  
+   private void doSLAM()
+   {
+      System.out.println("doSLAM");
    }
 }

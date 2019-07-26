@@ -20,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREASLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 import us.ihmc.ros2.Ros2Node;
 
@@ -49,6 +50,9 @@ public class LidarImageFusionProcessorUI
    
    @FXML
    private StereoREAAnchorPaneController stereoREAAnchorPaneController;
+   
+   @FXML
+   private StereoREASLAMAnchorPaneController stereoREASLAMAnchorPaneController;
 
    private LidarImageFusionProcessorUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
    {
@@ -133,5 +137,6 @@ public class LidarImageFusionProcessorUI
       imageProcessingAnchorPaneController.initialize(messager);
       objectDetectionAnchorPaneController.initialize(messager);
       stereoREAAnchorPaneController.initialize(messager);
+      stereoREASLAMAnchorPaneController.initialize(messager);
    }
 }

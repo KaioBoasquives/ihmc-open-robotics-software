@@ -45,6 +45,9 @@ public class LidarImageFusionAPI
    private static final CategoryTheme FusionData = apiFactory.createCategoryTheme("RawData");
    private static final CategoryTheme Result = apiFactory.createCategoryTheme("Result");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
+   private static final CategoryTheme LoadData = apiFactory.createCategoryTheme("LoadData");
+   private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
+   private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
 
    private static final TypedTopicTheme<Boolean> SnapShot = apiFactory.createTypedTopicTheme("SnapShot");
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
@@ -70,7 +73,7 @@ public class LidarImageFusionAPI
    public static final Topic<Image32> ImageState = ModuleCategory.child(Image).topic(Data);
    public static final Topic<BufferedImage> ImageResultState = ModuleCategory.child(Image).child(Result).topic(Data);
    public static final Topic<LidarImageFusionData> FusionDataState = ModuleCategory.child(StereoREA).child(FusionData).topic(Data);
-   
+
    public static final Topic<Point3D> CameraPositionState = ModuleCategory.child(Camera).topic(Position);
    public static final Topic<Quaternion> CameraOrientationState = ModuleCategory.child(Camera).topic(Orientation);
    public static final Topic<IntrinsicParameters> CameraIntrinsicParametersState = ModuleCategory.child(Camera).topic(IntrinsicParameters);
@@ -93,6 +96,13 @@ public class LidarImageFusionAPI
    public static final Topic<SegmentationRawDataFilteringParameters> SegmentationRawDataFilteringParameters = UICategory.child(DataFiltering).topic(Parameters);
    public static final Topic<ImageSegmentationParameters> ImageSegmentationParameters = UICategory.child(ImageSegmentation).topic(Parameters);
    public static final Topic<PlanarRegionPropagationParameters> PlanarRegionPropagationParameters = UICategory.child(StereoREA).topic(Parameters);
+
+   public static final Topic<Boolean> LoadSavedData = UICategory.child(LoadData).topic(Enable);
+   public static final Topic<Boolean> ShowRawData = UICategory.child(LoadData).topic(Request);
+   public static final Topic<Boolean> CalculatePlanarRegions = UICategory.child(PlanarRegions).topic(Enable);
+   public static final Topic<Boolean> ShowPlanarRegions = UICategory.child(PlanarRegions).topic(Request);
+   public static final Topic<Boolean> DoSLAM = UICategory.child(SLAM).topic(Enable);
+   public static final Topic<Boolean> ShowSLAM = UICategory.child(SLAM).topic(Request);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
