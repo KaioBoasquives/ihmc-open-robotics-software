@@ -4,6 +4,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -22,7 +23,7 @@ public abstract class QuadrupedStepStream<T extends Command> implements Consumer
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    /** Current or most recently completed steps on each end */
-   protected final EndDependentList<QuadrupedTimedStep> currentSteps = new EndDependentList<>(QuadrupedTimedStep::new);
+   protected final EndDependentList<YoQuadrupedTimedStep> currentSteps = new EndDependentList<>();
 
    /** Entire step sequence, including current steps */
    protected final PreallocatedList<QuadrupedTimedStep> stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class,
@@ -43,6 +44,9 @@ public abstract class QuadrupedStepStream<T extends Command> implements Consumer
    {
       this.timestamp = timestamp;
       this.stopRequested = new YoBoolean(namePrefix + "StopRequested", registry);
+
+      this.currentSteps.set(RobotEnd.FRONT, new YoQuadrupedTimedStep("frontCurrentStep", registry));
+      this.currentSteps.set(RobotEnd.HIND, new YoQuadrupedTimedStep("hindCurrentStep", registry));
 
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -97,7 +101,7 @@ public abstract class QuadrupedStepStream<T extends Command> implements Consumer
          QuadrupedTimedStep step = stepSequence.get(i);
          if(step.getTimeInterval().getStartTime() <= timestamp.getDoubleValue())
          {
-            currentSteps.set(step.getRobotQuadrant().getEnd(), step);
+            currentSteps.get(step.getRobotQuadrant().getEnd()).set(step);
          }
       }
 
