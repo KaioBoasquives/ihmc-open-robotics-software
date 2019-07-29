@@ -5,12 +5,15 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
@@ -19,6 +22,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataLoader;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -36,7 +40,7 @@ public class StereoREAModule implements Runnable
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
-   
+
    public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
@@ -45,12 +49,12 @@ public class StereoREAModule implements Runnable
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
-      
+
       planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
                                                                              subscriberTopicNameGenerator);
 
       initializeREAPlanarRegionPublicNetworkProvider();
-      
+
       messager.registerTopicListener(LidarImageFusionAPI.LoadSavedData, (content) -> loadSavedData());
       messager.registerTopicListener(LidarImageFusionAPI.CalculatePlanarRegions, (content) -> calculatePlanarRegions());
       messager.registerTopicListener(LidarImageFusionAPI.DoSLAM, (content) -> doSLAM());
@@ -138,18 +142,62 @@ public class StereoREAModule implements Runnable
       }
    }
 
+   private static final String filePath = "C:\\Users\\inhol\\Desktop\\SavedData\\SLAM\\SET3\\";
+   //   private static final String[] imageFilePaths = {"image_0.jpg", "image_1.jpg", "image_2.jpg"};
+   //   private static final String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt", "stereovision_pointcloud_2.txt"};
+   private static final String[] imageFilePaths = {"image_0.jpg", "image_1.jpg"};
+   private static final String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt"};
+
+   private final List<LidarImageFusionData> listOfFusionData = new ArrayList<LidarImageFusionData>();
+   private BufferedImage[] images;
+   private Point3D[][] pointClouds;
+
+   private PlanarRegionsList[] planarRegionsLists;
+
    private void loadSavedData()
    {
       System.out.println("loadSavedData");
+      int numberOfData = imageFilePaths.length;
+      System.out.println("numberOfData " + numberOfData);
+
+      images = new BufferedImage[numberOfData];
+      pointClouds = new Point3D[numberOfData][];
+
+      for (int i = 0; i < numberOfData; i++)
+      {
+         images[i] = LidarImageFusionDataLoader.readImage(filePath + imageFilePaths[i]);
+         pointClouds[i] = LidarImageFusionDataLoader.readPointCloud(filePath + pointCloudFilePaths[i]);
+      }
    }
-   
+
    private void calculatePlanarRegions()
    {
       System.out.println("calculatePlanarRegions");
+      listOfFusionData.clear();
+      listOfFusionData.addAll(lidarImageFusionDataBuffer.generateSavedDataBuffer(images, pointClouds));
+
+      System.out.println("listOfFusionData.size() " + listOfFusionData.size());
+
+      planarRegionsLists = new PlanarRegionsList[images.length];
+      for (int i = 0; i < listOfFusionData.size(); i++)
+      {
+         planarRegionFeatureUpdater.updateLatestLidarImageFusionData(listOfFusionData.get(i));
+
+         if (planarRegionFeatureUpdater.update())
+         {
+            reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
+            if (planarRegionFeatureUpdater.getPlanarRegionsList() != null)
+            {
+               PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegionFeatureUpdater.getPlanarRegionsList());
+               planarRegionsLists[i] = planarRegionsList;
+            }
+         }
+      }
    }
-  
+
    private void doSLAM()
    {
       System.out.println("doSLAM");
    }
+
 }
