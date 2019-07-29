@@ -1,6 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -50,6 +52,21 @@ public class LidarImageFusionDataBuffer
       return newBuffer.getAndSet(null);
    }
 
+   public List<LidarImageFusionData> generateSavedDataBuffer(BufferedImage[] images, Point3D[][] pointClouds)
+   {
+      List<LidarImageFusionData> listOfFusionData = new ArrayList<LidarImageFusionData>();
+      lidarImageFusionDataFactory.setImageSegmentationParameters(latestImageSegmentationParaeters.get());
+      lidarImageFusionDataFactory.setSegmentationRawDataFilteringParameters(latestSegmentationRawDataFilteringParameters.get());
+
+      for (int i = 0; i < images.length; i++)
+      {
+         LidarImageFusionData fusionData = lidarImageFusionDataFactory.createLidarImageFusionData(pointClouds[i], null, images[i]);
+         listOfFusionData.add(fusionData);
+      }
+
+      return listOfFusionData;
+   }
+
    public void updateNewBuffer()
    {
       StereoVisionPointCloudMessage pointCloudMessage = latestStereoVisionPointCloudMessage.get();
@@ -78,10 +95,10 @@ public class LidarImageFusionDataBuffer
          colors[i] = colorBuffer[i];
       }
 
-//      lidarImageFusionDataFactory.setIntrinsicParameters(latestCameraIntrinsicParameters.get());
+      //      lidarImageFusionDataFactory.setIntrinsicParameters(latestCameraIntrinsicParameters.get());
       lidarImageFusionDataFactory.setImageSegmentationParameters(latestImageSegmentationParaeters.get());
       lidarImageFusionDataFactory.setSegmentationRawDataFilteringParameters(latestSegmentationRawDataFilteringParameters.get());
-//      lidarImageFusionDataFactory.setCameraPose(latestCameraPosition.get(), latestCameraOrientation.get());
+      //      lidarImageFusionDataFactory.setCameraPose(latestCameraPosition.get(), latestCameraOrientation.get());
 
       LidarImageFusionData data = lidarImageFusionDataFactory.createLidarImageFusionData(pointCloud, colors, latestBufferedImage.get());
 
