@@ -114,7 +114,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
       else
       {
          SegmentationNodeData segmentNodeData = createSegmentNodeData(nonIDLabel, segmentId);
-         if(segmentNodeData != null)
+         if (segmentNodeData != null)
             segments.add(segmentNodeData);
       }
 
@@ -169,9 +169,9 @@ public class StereoREAPlanarRegionSegmentationCalculator
       if (resetSmallNodeData)
       {
          boolean isSmallNodeData = labels.size() < MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON;
-         if(isSmallNodeData)
+         if (isSmallNodeData)
          {
-            for(int label : labels.toArray())
+            for (int label : labels.toArray())
             {
                SegmentationRawData rawData = data.get().getFusionDataSegment(label);
                rawData.setId(SegmentationRawData.DEFAULT_SEGMENT_ID);

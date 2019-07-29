@@ -58,6 +58,19 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       customRegionMergingParameters = reaMessager.createInput(REAModuleAPI.CustomRegionsMergingParameters, new CustomRegionMergeParameters());
    }
 
+   public StereoREAPlanarRegionFeatureUpdater()
+   {
+      enableCustomRegions = new AtomicReference<Boolean>(true);
+      clearCustomRegions = new AtomicReference<Boolean>(false);
+
+      concaveHullFactoryParameters = new AtomicReference<ConcaveHullFactoryParameters>(new ConcaveHullFactoryParameters());
+      polygonizerParameters = new AtomicReference<PolygonizerParameters>(new PolygonizerParameters());
+      intersectionEstimationParameters = new AtomicReference<IntersectionEstimationParameters>(new IntersectionEstimationParameters());
+      segmentationRawDataFilteringParameters = new AtomicReference<SegmentationRawDataFilteringParameters>(new SegmentationRawDataFilteringParameters());
+      planarRegionPropagationParameters = new AtomicReference<PlanarRegionPropagationParameters>(new PlanarRegionPropagationParameters());
+      customRegionMergingParameters = new AtomicReference<CustomRegionMergeParameters>(new CustomRegionMergeParameters());
+   }
+
    public void updateLatestLidarImageFusionData(LidarImageFusionData lidarImageFusionData)
    {
       planarRegionSegmentationCalculator.updateFusionData(lidarImageFusionData, segmentationRawDataFilteringParameters.get(),
@@ -160,5 +173,15 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
    public LineSegment3D getIntersection(int index)
    {
       return planarRegionsIntersections.get(index);
+   }
+   
+   public void setSegmentationRawDataFilteringParameters(SegmentationRawDataFilteringParameters parameters)
+   {
+      segmentationRawDataFilteringParameters.set(parameters);
+   }
+
+   public void setPlanarRegionPropagationParameters(PlanarRegionPropagationParameters parameters)
+   {
+      planarRegionPropagationParameters.set(parameters);
    }
 }

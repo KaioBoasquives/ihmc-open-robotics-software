@@ -45,7 +45,7 @@ public class StereoREAModule implements Runnable
    {
       this.messager = messager;
       this.reaMessager = reaMessager;
-      lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
+      lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager);
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
@@ -179,7 +179,8 @@ public class StereoREAModule implements Runnable
       System.out.println("listOfFusionData.size() " + listOfFusionData.size());
 
       planarRegionsLists = new PlanarRegionsList[images.length];
-      for (int i = 0; i < listOfFusionData.size(); i++)
+      for (int i = 0; i < 1; i++)
+      // for (int i = 0; i < listOfFusionData.size(); i++)
       {
          planarRegionFeatureUpdater.updateLatestLidarImageFusionData(listOfFusionData.get(i));
 
@@ -190,6 +191,12 @@ public class StereoREAModule implements Runnable
             {
                PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegionFeatureUpdater.getPlanarRegionsList());
                planarRegionsLists[i] = planarRegionsList;
+               
+               PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+               reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
+
+               planarRegionNetworkProvider.update(true);
+               planarRegionNetworkProvider.publishCurrentState();
             }
          }
       }
