@@ -24,7 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFi
 public class LidarImageFusionDataFactory
 {
    private static final boolean enableDisplaySegmentedContour = true;
-   private static final boolean enableDisplayProjectedPointCloud = true;
+   private static final boolean enableDisplayProjectedPointCloud = false;  // TODO : revert to true.
 
    private final int bufferedImageType = BufferedImage.TYPE_INT_RGB;
    private final int matType = opencv_core.CV_8UC3;
