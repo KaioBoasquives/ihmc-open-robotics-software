@@ -51,17 +51,32 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
       double reachSquared = MathTools.square(parameters.getMaximumStepReach());
+      double nominalWidth = parameters.getIdealFootstepWidth();
+      double minInward = nominalWidth - parameters.getMinimumStepWidth();
+      double maxOutward = parameters.getMaximumStepWidth() - nominalWidth;
+
       for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
       {
          for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
-            if (MathTools.square(x) + MathTools.square(y) > reachSquared)
-               continue;
+//            if (MathTools.square(x) + MathTools.square(y) > reachSquared)
+//               continue;
 
             if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
             {
                continue;
             }
+
+            double stepWidth = nominalWidth - y;
+            double maxYMotion;
+            if (stepWidth < 0.0)
+            { // stepping inward
+               maxYMotion = minInward;
+            }
+            else
+               maxYMotion = maxOutward;
+            if (MathTools.square(stepWidth / maxYMotion) + MathTools.square(x / parameters.getMaximumStepReach()) > 1.0)
+               continue;
 
             for (double yaw = parameters.getMinimumStepYaw(); yaw <= parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
             {
