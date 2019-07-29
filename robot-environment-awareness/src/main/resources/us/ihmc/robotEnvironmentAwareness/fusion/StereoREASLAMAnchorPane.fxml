@@ -15,8 +15,14 @@
       </VBox>
       <VBox layoutX="277.0" layoutY="48.0" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-border-color: lightblue; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 3;">
          <children>
-            <Button fx:id="calculatePlanarRegions" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#calculatePlanarRegions" text="Calculate Planar Regions" />
+            <HBox prefHeight="7.0" prefWidth="190.0">
+               <children>
+                  <TextField fx:id="indexOfDataToExport" alignment="CENTER" prefHeight="25.0" prefWidth="48.0" text="-1" />
+                  <Button fx:id="calculatePlanarRegions" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#calculatePlanarRegions" prefHeight="25.0" prefWidth="150.0" text="Calculate Planar Regions" />
+               </children>
+            </HBox>
             <ToggleButton fx:id="showPlanarRegions" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Planar Regions" />
+            <Button fx:id="exportPlanarRegions" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exportPlanarRegions" prefHeight="25.0" prefWidth="1.0" text="Export Planar Regions" />
             <Button fx:id="doSLAM" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#doSLAM" text="SLAM" />
             <ToggleButton fx:id="showSLAMResult" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show SLAM Result" />
          </children>

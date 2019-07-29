@@ -22,6 +22,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchor
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREASLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.ros2.Ros2Node;
 
 public class LidarImageFusionProcessorUI
@@ -75,6 +76,8 @@ public class LidarImageFusionProcessorUI
 
       meshViewer = new FusionSensorMeshViewer(ros2Node, messager, reaMessager);
       imageViewer = new FusionSensorImageViewer(messager, imageViewPane);
+      
+      new PlanarRegionDataExporter(reaMessager);
 
       view3dFactory.addNodeToView(meshViewer.getRoot());
 
@@ -137,6 +140,6 @@ public class LidarImageFusionProcessorUI
       imageProcessingAnchorPaneController.initialize(messager);
       objectDetectionAnchorPaneController.initialize(messager);
       stereoREAAnchorPaneController.initialize(messager);
-      stereoREASLAMAnchorPaneController.initialize(messager);
+      stereoREASLAMAnchorPaneController.initialize(messager, reaMessager);
    }
 }

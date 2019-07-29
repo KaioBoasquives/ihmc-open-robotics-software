@@ -15,6 +15,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -23,7 +24,6 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataLoader;
-import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -40,6 +40,8 @@ public class StereoREAModule implements Runnable
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
+
+   private final AtomicReference<Integer> dataIndexToCalculate;
 
    public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
@@ -58,6 +60,8 @@ public class StereoREAModule implements Runnable
       messager.registerTopicListener(LidarImageFusionAPI.LoadSavedData, (content) -> loadSavedData());
       messager.registerTopicListener(LidarImageFusionAPI.CalculatePlanarRegions, (content) -> calculatePlanarRegions());
       messager.registerTopicListener(LidarImageFusionAPI.DoSLAM, (content) -> doSLAM());
+      messager.registerTopicListener(LidarImageFusionAPI.ExportData, (content) -> exportData());
+      dataIndexToCalculate = messager.createInput(LidarImageFusionAPI.DataIndexToCalculate, -1);
    }
 
    private void initializeREAPlanarRegionPublicNetworkProvider()
@@ -142,11 +146,10 @@ public class StereoREAModule implements Runnable
       }
    }
 
-   private static final String filePath = "C:\\Users\\inhol\\Desktop\\SavedData\\SLAM\\SET3\\";
-   //   private static final String[] imageFilePaths = {"image_0.jpg", "image_1.jpg", "image_2.jpg"};
-   //   private static final String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt", "stereovision_pointcloud_2.txt"};
-   private static final String[] imageFilePaths = {"image_0.jpg", "image_1.jpg"};
-   private static final String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt"};
+   private static final String filePath = "C:\\Users\\inhol\\Desktop\\SavedData\\SLAM\\complex blocks\\";
+   private static final int numberOfData = 12;
+   private static String[] imageFilePaths = {"image_0.jpg", "image_1.jpg", "image_2.jpg"};
+   private static String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt", "stereovision_pointcloud_2.txt"};
 
    private final List<LidarImageFusionData> listOfFusionData = new ArrayList<LidarImageFusionData>();
    private BufferedImage[] images;
@@ -156,9 +159,14 @@ public class StereoREAModule implements Runnable
 
    private void loadSavedData()
    {
-      System.out.println("loadSavedData");
-      int numberOfData = imageFilePaths.length;
-      System.out.println("numberOfData " + numberOfData);
+      System.out.println("loadSavedData " + numberOfData);
+      imageFilePaths = new String[numberOfData];
+      pointCloudFilePaths = new String[numberOfData];
+      for (int i = 0; i < numberOfData; i++)
+      {
+         imageFilePaths[i] = "image_" + i + ".jpg";
+         pointCloudFilePaths[i] = "stereovision_pointcloud_" + i + ".txt";
+      }
 
       images = new BufferedImage[numberOfData];
       pointClouds = new Point3D[numberOfData][];
@@ -178,9 +186,42 @@ public class StereoREAModule implements Runnable
 
       System.out.println("listOfFusionData.size() " + listOfFusionData.size());
 
+      if (dataIndexToCalculate.get() == -1)
+      {
+         LogTools.info("Put proper index");
+      }
+      else if (dataIndexToCalculate.get() < images.length)
+      {
+         planarRegionFeatureUpdater.updateLatestLidarImageFusionData(listOfFusionData.get(dataIndexToCalculate.get()));
+
+         if (planarRegionFeatureUpdater.update())
+         {
+            reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
+            if (planarRegionFeatureUpdater.getPlanarRegionsList() != null)
+            {
+               PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegionFeatureUpdater.getPlanarRegionsList());
+
+               PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+               reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
+
+               planarRegionNetworkProvider.update(true);
+               planarRegionNetworkProvider.publishCurrentState();
+            }
+         }
+      }
+      else
+      {
+         LogTools.info("Put proper index");
+      }
+   }
+
+   private void doSLAM()
+   {
+      System.out.println("doSLAM");
+
       planarRegionsLists = new PlanarRegionsList[images.length];
-      for (int i = 0; i < 1; i++)
-      // for (int i = 0; i < listOfFusionData.size(); i++)
+
+      for (int i = 0; i < listOfFusionData.size(); i++)
       {
          planarRegionFeatureUpdater.updateLatestLidarImageFusionData(listOfFusionData.get(i));
 
@@ -191,7 +232,7 @@ public class StereoREAModule implements Runnable
             {
                PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegionFeatureUpdater.getPlanarRegionsList());
                planarRegionsLists[i] = planarRegionsList;
-               
+
                PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
                reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
 
@@ -202,9 +243,8 @@ public class StereoREAModule implements Runnable
       }
    }
 
-   private void doSLAM()
+   private void exportData()
    {
-      System.out.println("doSLAM");
+      reaMessager.submitMessage(REAModuleAPI.UIPlanarRegionDataExportRequest, true);
    }
-
 }

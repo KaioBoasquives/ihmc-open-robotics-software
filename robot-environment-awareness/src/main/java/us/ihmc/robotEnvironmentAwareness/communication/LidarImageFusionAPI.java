@@ -58,6 +58,7 @@ public class LidarImageFusionAPI
    private static final TypedTopicTheme<List<ObjectType>> ObjecTypes = apiFactory.createTypedTopicTheme("ObjecTypes");
    private static final TypedTopicTheme<String> Time = apiFactory.createTypedTopicTheme("Time");
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
+   private static final TypedTopicTheme<Integer> Index = apiFactory.createTypedTopicTheme("Index");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<IntrinsicParameters> IntrinsicParameters = apiFactory.createTypedTopicTheme("IntrinsicParameters");
@@ -92,6 +93,7 @@ public class LidarImageFusionAPI
    public static final Topic<Boolean> ShowFusionData = UICategory.child(StereoREA).child(FusionData).topic(Request);
    public static final Topic<Boolean> ShowStereoBufferProjection = UICategory.child(StereoREA).child(Buffer).topic(SnapShot);
    public static final Topic<Boolean> RunStereoREA = UICategory.child(StereoREA).topic(Request);
+   public static final Topic<Boolean> ExportData = UICategory.child(StereoREA).child(Result).topic(Request);
 
    public static final Topic<SegmentationRawDataFilteringParameters> SegmentationRawDataFilteringParameters = UICategory.child(DataFiltering).topic(Parameters);
    public static final Topic<ImageSegmentationParameters> ImageSegmentationParameters = UICategory.child(ImageSegmentation).topic(Parameters);
@@ -99,6 +101,7 @@ public class LidarImageFusionAPI
 
    public static final Topic<Boolean> LoadSavedData = UICategory.child(LoadData).topic(Enable);
    public static final Topic<Boolean> ShowRawData = UICategory.child(LoadData).topic(Request);
+   public static final Topic<Integer> DataIndexToCalculate = UICategory.child(PlanarRegions).topic(Index);
    public static final Topic<Boolean> CalculatePlanarRegions = UICategory.child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> ShowPlanarRegions = UICategory.child(PlanarRegions).topic(Request);
    public static final Topic<Boolean> DoSLAM = UICategory.child(SLAM).topic(Enable);
