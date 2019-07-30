@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
@@ -146,10 +147,10 @@ public class StereoREAModule implements Runnable
       }
    }
 
-   private static final String filePath = "C:\\Users\\inhol\\Desktop\\SavedData\\SLAM\\complex blocks\\";
-   private static final int numberOfData = 12;
-   private static String[] imageFilePaths = {"image_0.jpg", "image_1.jpg", "image_2.jpg"};
-   private static String[] pointCloudFilePaths = {"stereovision_pointcloud_0.txt", "stereovision_pointcloud_1.txt", "stereovision_pointcloud_2.txt"};
+   private static final String filePath = "C:\\Users\\inhol\\Desktop\\SavedData\\SLAM\\Complex_Manual_Transform_1\\";
+   private static final int numberOfData = 6;
+   private static String[] imageFilePaths;
+   private static String[] pointCloudFilePaths;
 
    private final List<LidarImageFusionData> listOfFusionData = new ArrayList<LidarImageFusionData>();
    private BufferedImage[] images;
@@ -200,6 +201,13 @@ public class StereoREAModule implements Runnable
             if (planarRegionFeatureUpdater.getPlanarRegionsList() != null)
             {
                PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegionFeatureUpdater.getPlanarRegionsList());
+               RigidBodyTransform manualTransform = new RigidBodyTransform();
+               
+               //manualTransform.appendYawRotation(dataIndexToCalculate.get() * Math.PI / 3);
+               manualTransform.appendYawRotation(dataIndexToCalculate.get() * Math.PI / 15);
+               manualTransform.appendPitchRotation(Math.PI / 4);
+               
+               planarRegionsList.transformByPreMultiply(manualTransform);
 
                PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
                reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
