@@ -7,13 +7,13 @@
 
 <AnchorPane prefHeight="296.0" prefWidth="753.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREASLAMAnchorPaneController">
    <children>
-      <VBox layoutX="46.0" layoutY="48.0" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-border-color: lightblue; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 3;">
+      <VBox layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-border-color: lightblue; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 3;">
          <children>
             <Button fx:id="loadSavedData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadSavedData" text="Load Saved Data" />
             <ToggleButton fx:id="showRawData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Raw Data" />
          </children>
       </VBox>
-      <VBox layoutX="277.0" layoutY="48.0" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-border-color: lightblue; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 3;">
+      <VBox layoutX="245.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-border-color: lightblue; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 3;">
          <children>
             <HBox prefHeight="7.0" prefWidth="190.0">
                <children>

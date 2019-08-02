@@ -3,6 +3,9 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.messager.Messager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 
@@ -16,8 +19,11 @@ public class LidarBasedREAStandaloneLauncher extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
+      SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(LidarImageFusionAPI.API);
+      messager.startMessager();
+      
+      ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage, messager);
+      module = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, messager);
 
       ui.show();
       module.start();

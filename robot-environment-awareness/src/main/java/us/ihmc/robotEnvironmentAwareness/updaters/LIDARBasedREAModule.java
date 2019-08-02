@@ -4,8 +4,10 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -20,9 +22,11 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -30,9 +34,11 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataLoader;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -71,7 +77,10 @@ public class LIDARBasedREAModule
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
+   private final AtomicReference<Integer> dataIndexToCalculate;
+
+   //TODO: fake constructor.
+   private LIDARBasedREAModule(Messager reaMessager, File configurationFile, Messager messager) throws IOException
    {
       this.reaMessager = reaMessager;
 
@@ -112,6 +121,95 @@ public class LIDARBasedREAModule
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
+
+      messager.registerTopicListener(LidarImageFusionAPI.LoadSavedData, (content) -> loadSavedData());
+      messager.registerTopicListener(LidarImageFusionAPI.CalculatePlanarRegions, (content) -> calculatePlanarRegions());
+      messager.registerTopicListener(LidarImageFusionAPI.DoSLAM, (content) -> doSLAM());
+      dataIndexToCalculate = messager.createInput(LidarImageFusionAPI.DataIndexToCalculate, -1);
+   }
+
+   private static final String filePath = Paths.get(".").toAbsolutePath().normalize().toString() + "\\Data\\StereoPointCloud\\complex blocks\\";
+   private static final int numberOfData = 12;
+   private static String[] imageFilePaths;
+   private static String[] pointCloudFilePaths;
+
+   private BufferedImage[] images;
+   private Point3D[][] pointClouds;
+
+   private PlanarRegionsList[] planarRegionsLists;
+
+   private void loadSavedData()
+   {
+      System.out.println("loadSavedData " + numberOfData);
+      System.out.println(filePath);
+      imageFilePaths = new String[numberOfData];
+      pointCloudFilePaths = new String[numberOfData];
+      for (int i = 0; i < numberOfData; i++)
+      {
+         imageFilePaths[i] = "image_" + i + ".jpg";
+         pointCloudFilePaths[i] = "stereovision_pointcloud_" + i + ".txt";
+      }
+
+      images = new BufferedImage[numberOfData];
+      pointClouds = new Point3D[numberOfData][];
+
+      for (int i = 0; i < numberOfData; i++)
+      {
+         images[i] = LidarImageFusionDataLoader.readImage(filePath + imageFilePaths[i]);
+         pointClouds[i] = LidarImageFusionDataLoader.readPointCloud(filePath + pointCloudFilePaths[i]);
+      }
+   }
+
+   private void calculatePlanarRegions()
+   {
+      System.out.println("calculatePlanarRegions");
+
+      if (dataIndexToCalculate.get() == -1)
+      {
+         LogTools.info("Put proper index");
+      }
+      else if (dataIndexToCalculate.get() < images.length)
+      {
+         Point3D[] pointCloud = pointClouds[dataIndexToCalculate.get()];
+         int numberOfPoints = pointCloud.length;
+         
+         long timestamp = 870612L;
+         float[] pointCloudBuffer = new float[3 * numberOfPoints];
+         int[] colorsInteger = new int[numberOfPoints];
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            Point3D scanPoint = pointCloud[i];
+
+            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
+            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
+            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
+
+            colorsInteger[i] = 0;
+         }
+
+         StereoVisionPointCloudMessage dummyMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
+         dispatchStereoVisionPointCloudMessage(dummyMessage);
+      }
+      else
+      {
+         LogTools.info("Put proper index");
+      }
+   }
+   
+   private void dispatchStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      moduleStateReporter.registerStereoVisionPointCloudMessage(message);
+      stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
+   }
+
+   private void doSLAM()
+   {
+      System.out.println("doSLAM");
+   }
+
+   private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
+   {
+      this(reaMessager, configurationFile, null);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -301,5 +399,27 @@ public class LIDARBasedREAModule
       }
 
       return new LIDARBasedREAModule(messager, configurationFile);
+   }
+
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Messager fakeMessager) throws Exception
+   {
+      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
+      messager.startMessager();
+
+      File configurationFile = new File(configurationFilePath);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
+      return new LIDARBasedREAModule(messager, configurationFile, fakeMessager);
    }
 }

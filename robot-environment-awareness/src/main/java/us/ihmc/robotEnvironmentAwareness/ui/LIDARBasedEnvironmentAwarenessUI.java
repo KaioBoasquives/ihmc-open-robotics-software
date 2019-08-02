@@ -10,12 +10,15 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREASLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.LIDARFilterAnchorPaneController;
@@ -55,12 +58,14 @@ public class LIDARBasedEnvironmentAwarenessUI
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
    @FXML
    private DataExporterAnchorPaneController dataExporterAnchorPaneController;
+   @FXML
+   private StereoREASLAMAnchorPaneController stereoREASLAMAnchorPaneController;
 
    private final Stage primaryStage;
 
    private final UIConnectionHandler uiConnectionHandler;
 
-   private LIDARBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
+   private LIDARBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage, SharedMemoryJavaFXMessager messager) throws Exception
    {
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
@@ -77,6 +82,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
 
+      stereoREASLAMAnchorPaneController.initialize(messager, uiMessager);
       initializeControllers(uiMessager);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -180,17 +186,17 @@ public class LIDARBasedEnvironmentAwarenessUI
       }
    }
 
-   public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
+   public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage, SharedMemoryJavaFXMessager messager) throws Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
+      return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage, messager);
    }
 
    public static LIDARBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
    {
       Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
+      return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage, null);
    }
 }

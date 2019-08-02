@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -206,7 +207,7 @@ public class REAOcTreeBuffer
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), new Point3D()));
       }
    }
 
