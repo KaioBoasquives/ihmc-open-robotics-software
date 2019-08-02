@@ -142,7 +142,7 @@ public interface FootstepPlannerCostParameters
     */
    default double getLongStepWeight()
    {
-      return 1.0;
+      return getForwardWeight();
    }
 
    /**
@@ -150,7 +150,7 @@ public interface FootstepPlannerCostParameters
     */
    default double getFootholdAreaWeight()
    {
-      return 1.0;
+      return 0.0;
    }
 
    /**
