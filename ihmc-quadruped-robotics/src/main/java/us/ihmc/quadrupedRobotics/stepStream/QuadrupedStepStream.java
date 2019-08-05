@@ -14,9 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public abstract class QuadrupedStepStream<T extends Command> implements Consumer<T>
 {
@@ -120,6 +118,7 @@ public abstract class QuadrupedStepStream<T extends Command> implements Consumer
       {
          doActionInternal(command.getValue());
          stepSequence.sort(TimeIntervalTools.startTimeComparator);
+         command.setValue(null);
       }
    }
 
